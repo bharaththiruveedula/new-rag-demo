@@ -871,7 +871,8 @@ function App() {
             {[
               { id: 'dashboard', name: 'Dashboard', icon: '📊' },
               { id: 'suggestions', name: 'Code Suggestions', icon: '💡' },
-              { id: 'vectorization', name: 'Vectorization', icon: '🔍' },
+              { id: 'search', name: 'Code Search', icon: '🔍' },
+              { id: 'vectorization', name: 'Vectorization', icon: '📈' },
               { id: 'connections', name: 'Status', icon: '🔗' },
               { id: 'config', name: 'Configuration', icon: '⚙️' },
             ].map((tab) => (
