@@ -788,6 +788,16 @@ async def get_vectorization_status():
     # Check database for latest status
     status_doc = await db.vectorization_status.find_one({}, sort=[("last_updated", -1)])
     if status_doc:
+        # Remove MongoDB ObjectId field
+        if "_id" in status_doc:
+            del status_doc["_id"]
+        
+        # Add missing fields with defaults if they don't exist
+        status_doc.setdefault("total_chunks", 0)
+        status_doc.setdefault("processed_chunks", 0)
+        status_doc.setdefault("file_types", {})
+        status_doc.setdefault("error_details", [])
+        
         return EnhancedVectorizationStatus(**status_doc)
     
     return EnhancedVectorizationStatus(
