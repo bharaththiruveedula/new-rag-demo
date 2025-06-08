@@ -19,6 +19,7 @@ function App() {
   });
   const [suggestions, setSuggestions] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Load configuration and data on component mount
   useEffect(() => {
