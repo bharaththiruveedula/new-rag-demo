@@ -18,7 +18,7 @@ function App() {
     processingTime: 0
   });
   const [suggestions, setSuggestions] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   // Load configuration and data on component mount
   useEffect(() => {
