@@ -553,7 +553,6 @@ function App() {
         </div>
 
         <div>
-          {console.log('Current activeTab:', activeTab)}
           {activeTab === 'connections' && <ConnectionsTab />}
           {activeTab === 'config' && <ConfigurationTab />}
           {activeTab === 'vectorization' && <VectorizationTab />}
