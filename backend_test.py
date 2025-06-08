@@ -175,6 +175,36 @@ class RAGCodeSuggestionAPITester:
             result = response.json()
             print(f"Merge Request Created: {result['message']} - URL: {result['merge_request_url']}")
         return success
+        
+    def test_get_analytics(self):
+        """Test getting system analytics and metrics"""
+        success, response = self.run_test(
+            "Get Analytics",
+            "GET",
+            "analytics",
+            200
+        )
+        if success:
+            analytics = response.json()
+            print(f"Analytics - Total Suggestions: {analytics.get('total_suggestions')} - Avg Confidence: {analytics.get('avg_confidence')}%")
+            print(f"Successful MRs: {analytics.get('successful_merge_requests')} - Avg Processing Time: {analytics.get('avg_processing_time')}s")
+        return success
+        
+    def test_search_code(self, query):
+        """Test semantic code search"""
+        success, response = self.run_test(
+            "Search Code",
+            "GET",
+            f"search/code",
+            200,
+            params={"query": query}
+        )
+        if success:
+            results = response.json()
+            print(f"Search Results for '{query}' - Found {len(results.get('results', []))} matches")
+            for i, result in enumerate(results.get('results', [])[:3]):  # Show first 3 results
+                print(f"  {i+1}. {result.get('file_path')} - Similarity: {result.get('similarity'):.2f}")
+        return success
 
     def print_summary(self):
         """Print test summary"""
