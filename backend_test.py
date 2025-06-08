@@ -266,6 +266,12 @@ def main():
     # Test merge request creation
     tester.test_create_merge_request(test_ticket_id)
     
+    # Test analytics endpoint
+    tester.test_get_analytics()
+    
+    # Test code search
+    tester.test_search_code("ansible module")
+    
     # Print summary
     tester.print_summary()
 
