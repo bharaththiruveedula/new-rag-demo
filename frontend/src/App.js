@@ -1222,6 +1222,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {activeTab === 'dashboard' && <DashboardTab />}
           {activeTab === 'suggestions' && <CodeSuggestionsTab />}
+          {activeTab === 'search' && <CodeSearchTab />}
           {activeTab === 'vectorization' && <VectorizationTab />}
           {activeTab === 'connections' && <ConnectionsTab />}
           {activeTab === 'config' && <ConfigurationTab />}
