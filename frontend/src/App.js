@@ -538,10 +538,7 @@ function App() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => {
-                  console.log('Tab clicked:', tab.id);
-                  setActiveTab(tab.id);
-                }}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 py-2 px-4 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-indigo-100 text-indigo-700 border-b-2 border-indigo-700'
