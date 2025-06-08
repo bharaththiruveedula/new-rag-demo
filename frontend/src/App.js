@@ -163,6 +163,24 @@ function App() {
     }
   };
 
+  const performCodeSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/search/code?query=${encodeURIComponent(searchQuery)}`);
+      
+      if (response.ok) {
+        const results = await response.json();
+        setSearchResults(results.results || []);
+      }
+    } catch (error) {
+      console.error('Failed to search code:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'connected':
