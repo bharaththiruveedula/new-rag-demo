@@ -157,9 +157,12 @@ class RAGCodeSuggestionAPITester:
         if success:
             suggestion = response.json()
             print(f"Code Suggestion for {suggestion['ticket_id']} - Confidence: {suggestion['confidence_score']}")
-            print(f"File Path: {suggestion['file_path']}")
+            if 'suggested_changes' in suggestion and suggestion['suggested_changes']:
+                change = suggestion['suggested_changes'][0]
+                print(f"File Path: {change.get('file_path', 'N/A')}")
+                print(f"Change Type: {change.get('change_type', 'N/A')}")
+                print(f"Content Preview: {change.get('content', '')[:100]}...")
             print(f"Explanation: {suggestion['explanation']}")
-            print(f"Suggested Code: {suggestion['suggested_code'][:100]}...")
         return success
 
     def test_create_merge_request(self, ticket_id):
