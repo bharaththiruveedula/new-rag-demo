@@ -68,16 +68,25 @@ class RAGCodeSuggestionAPITester:
             print(f"❌ Error - {str(e)}")
             return False, None
 
-    def test_get_config(self):
-        """Test getting the current configuration"""
+    def test_update_config(self, config_update):
+        """Test updating the configuration"""
         success, response = self.run_test(
-            "Get Configuration",
-            "GET",
+            "Update Configuration",
+            "POST",
             "config",
-            200
+            200,
+            data=config_update
         )
         if success:
-            print(f"Configuration retrieved: {json.dumps(response.json(), indent=2)}")
+            print(f"Configuration updated: {json.dumps(response.json(), indent=2)}")
+            
+            # If OLLAMA URL was updated, check if it was properly saved
+            if 'ollama_url' in config_update:
+                updated_config = response.json()
+                if updated_config.get('ollama_url') == config_update['ollama_url']:
+                    print(f"✅ OLLAMA URL successfully updated to: {updated_config['ollama_url']}")
+                else:
+                    print(f"❌ OLLAMA URL not updated correctly. Expected: {config_update['ollama_url']}, Got: {updated_config.get('ollama_url')}")
         return success
 
     def test_check_all_connections(self):
