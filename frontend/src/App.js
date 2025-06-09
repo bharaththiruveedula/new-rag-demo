@@ -17,6 +17,8 @@ function App() {
   });
   const [jiraTicketId, setJiraTicketId] = useState('');
   const [codeSuggestion, setCodeSuggestion] = useState(null);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [loadingModels, setLoadingModels] = useState(false);
 
   // Load configuration and data on component mount
   useEffect(() => {
