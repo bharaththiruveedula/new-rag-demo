@@ -151,10 +151,18 @@ function App() {
       
       if (response.ok) {
         const result = await response.json();
-        alert(`Merge request created successfully!\n${result.merge_request_url}`);
+        // Show success message with proper feedback
+        const message = `✅ Merge Request Created Successfully!\n\n` +
+                       `Branch: ${result.branch_name}\n` +
+                       `URL: ${result.merge_request_url}\n` +
+                       `Changes: ${result.suggested_changes || 1} file(s)\n` +
+                       `Confidence: ${result.confidence_score ? (result.confidence_score * 100).toFixed(1) + '%' : 'N/A'}`;
+        
+        alert(message);
       }
     } catch (error) {
       console.error('Failed to create merge request:', error);
+      alert('❌ Failed to create merge request. Please check your GitLab configuration.');
     } finally {
       setIsLoading(false);
     }
