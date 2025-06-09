@@ -68,6 +68,25 @@ class RAGCodeSuggestionAPITester:
             print(f"❌ Error - {str(e)}")
             return False, None
 
+    def test_get_config(self):
+        """Test getting the current configuration"""
+        success, response = self.run_test(
+            "Get Configuration",
+            "GET",
+            "config",
+            200
+        )
+        if success:
+            config = response.json()
+            print(f"Configuration retrieved: {json.dumps(config, indent=2)}")
+            
+            # Check if OLLAMA configuration is present
+            if 'ollama_url' in config and 'ollama_model' in config:
+                print(f"✅ OLLAMA configuration found - URL: {config['ollama_url']}, Model: {config['ollama_model']}")
+            else:
+                print("❌ OLLAMA configuration missing")
+        return success
+        
     def test_update_config(self, config_update):
         """Test updating the configuration"""
         success, response = self.run_test(
