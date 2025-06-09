@@ -408,6 +408,16 @@ ${lines.map(line => '+' + line).join('\n')}`;
             </div>
           )}
 
+          {/* Show message if no similar code found but suggestion exists */}
+          {codeSuggestion.similar_code_snippets && codeSuggestion.similar_code_snippets.length === 0 && (
+            <div className="bg-gray-50 border border-gray-200 p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Similar Code References</h3>
+              <p className="text-gray-600 text-sm">
+                No similar code snippets found in the current repository. This could indicate a novel implementation or that the repository needs to be vectorized.
+              </p>
+            </div>
+          )}
+
           {/* Git Diff Display */}
           <div className="bg-white border border-gray-200 p-8 space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Code Changes (Git Diff Format)</h3>
