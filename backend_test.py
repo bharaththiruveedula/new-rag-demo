@@ -93,18 +93,16 @@ class RAGCodeSuggestionAPITester:
             print(f"Configuration updated: {json.dumps(response.json(), indent=2)}")
         return success
 
-    def test_check_all_connections(self):
-        """Test checking all service connections"""
+    def test_vectorize_repository(self):
+        """Test starting repository vectorization"""
         success, response = self.run_test(
-            "Check All Connections",
-            "GET",
-            "status/all",
+            "Start Repository Vectorization",
+            "POST",
+            "vectorize/repository",
             200
         )
         if success:
-            statuses = response.json()
-            for status in statuses:
-                print(f"Service: {status['service']} - Status: {status['status']} - Message: {status['message']}")
+            print(f"Vectorization started: {json.dumps(response.json(), indent=2)}")
         return success
 
     def test_check_service_connection(self, service):
