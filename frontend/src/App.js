@@ -85,6 +85,11 @@ function App() {
         const updatedConfig = await response.json();
         setConfig(updatedConfig);
         await checkAllConnections();
+        
+        // If OLLAMA URL was updated, fetch available models
+        if (updates.ollama_url) {
+          await fetchAvailableModels(updates.ollama_url);
+        }
       }
     } catch (error) {
       console.error('Failed to update configuration:', error);
