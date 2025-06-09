@@ -647,13 +647,26 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">OLLAMA URL</label>
-              <input
-                type="text"
-                value={config.ollama_url || ''}
-                onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
-                placeholder="http://localhost:11434"
-              />
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={config.ollama_url || ''}
+                  onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
+                  className="flex-1 px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                  placeholder="http://localhost:11434"
+                />
+                <button
+                  onClick={() => fetchAvailableModels()}
+                  disabled={loadingModels || !config.ollama_url}
+                  className="px-4 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  title="Refresh available models"
+                >
+                  {loadingModels ? '⟳' : '🔄'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Update URL and click refresh to fetch available models
+              </p>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Model Name</label>
@@ -661,13 +674,27 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 value={config.ollama_model || ''}
                 onChange={(e) => setConfig({...config, ollama_model: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                disabled={loadingModels}
               >
-                <option value="">Select Model</option>
-                <option value="codellama">CodeLlama</option>
-                <option value="codellama:13b">CodeLlama 13B</option>
-                <option value="codellama:34b">CodeLlama 34B</option>
-                <option value="deepseek-coder">DeepSeek Coder</option>
+                <option value="">
+                  {loadingModels ? 'Loading models...' : 'Select Model'}
+                </option>
+                {availableModels.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
               </select>
+              {availableModels.length === 0 && !loadingModels && (
+                <p className="text-xs text-amber-600">
+                  No models found. Check OLLAMA connection or click refresh.
+                </p>
+              )}
+              {availableModels.length > 0 && (
+                <p className="text-xs text-gray-500">
+                  {availableModels.length} model(s) available from OLLAMA
+                </p>
+              )}
             </div>
           </div>
         </div>
