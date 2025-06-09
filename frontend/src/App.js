@@ -8,8 +8,6 @@ function App() {
   const [connectionStatuses, setConnectionStatuses] = useState([]);
   const [config, setConfig] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [jiraTicketId, setJiraTicketId] = useState('');
-  const [codeSuggestion, setCodeSuggestion] = useState(null);
   const [vectorizationStatus, setVectorizationStatus] = useState(null);
   const [analytics, setAnalytics] = useState({
     totalSuggestions: 0,
@@ -17,7 +15,6 @@ function App() {
     successfulMRs: 0,
     processingTime: 0
   });
-  const [suggestions, setSuggestions] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -119,51 +116,6 @@ function App() {
     }
   };
 
-  const generateCodeSuggestion = async () => {
-    if (!jiraTicketId.trim()) return;
-    
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/suggest/code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ticket_id: jiraTicketId }),
-      });
-      
-      if (response.ok) {
-        const suggestion = await response.json();
-        setCodeSuggestion(suggestion);
-        setSuggestions(prev => [suggestion, ...prev.slice(0, 4)]);
-      }
-    } catch (error) {
-      console.error('Failed to generate code suggestion:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const createMergeRequest = async () => {
-    if (!jiraTicketId.trim()) return;
-    
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/gitlab/merge-request?ticket_id=${jiraTicketId}`, {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        alert(`🚀 Merge request created successfully!\n${result.merge_request_url}`);
-      }
-    } catch (error) {
-      console.error('Failed to create merge request:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const performCodeSearch = async () => {
     if (!searchQuery.trim()) return;
     
@@ -185,438 +137,108 @@ function App() {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'connected':
-        return '🟢';
+        return '●';
       case 'error':
-        return '🔴';
+        return '●';
       case 'not_configured':
-        return '🟡';
+        return '●';
       default:
-        return '⚪';
+        return '●';
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'connected':
-        return 'text-emerald-400';
+        return 'text-emerald-500';
       case 'error':
-        return 'text-red-400';
+        return 'text-red-500';
       case 'not_configured':
-        return 'text-amber-400';
+        return 'text-amber-500';
       default:
-        return 'text-slate-400';
+        return 'text-gray-400';
     }
   };
 
-  // Modern Dashboard Component
+  // Dashboard Tab (combines status and analytics)
   const DashboardTab = () => (
-    <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-8">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1652449823136-b279fbe5dfd3')] bg-cover bg-center opacity-20"></div>
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                AI Code Assistant
-              </h1>
-              <p className="text-xl text-indigo-200">
-                Intelligent code suggestions powered by RAG technology
-              </p>
-            </div>
-            <div className="glass-card p-6 text-center">
-              <div className="text-3xl font-bold text-white">
-                {analytics.totalSuggestions}
-              </div>
-              <div className="text-sm text-indigo-200">
-                Suggestions Generated
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="absolute top-4 right-4 w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full opacity-20 blur-xl"></div>
-        <div className="absolute bottom-4 left-4 w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full opacity-20 blur-xl"></div>
+    <div className="space-y-12">
+      {/* Hero Section - Clean and Minimal */}
+      <div className="text-center space-y-6">
+        <h1 className="text-5xl font-light text-gray-900 tracking-tight">
+          RAG Assistant
+        </h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Intelligent code analysis and suggestions powered by advanced AI technology
+        </p>
       </div>
 
-      {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { title: 'Avg Confidence', value: `${analytics.avgConfidence}%`, icon: '🎯', color: 'from-emerald-500 to-teal-600' },
-          { title: 'Successful MRs', value: analytics.successfulMRs, icon: '🚀', color: 'from-blue-500 to-indigo-600' },
-          { title: 'Processing Time', value: `${analytics.processingTime}s`, icon: '⚡', color: 'from-amber-500 to-orange-600' },
-          { title: 'Success Rate', value: '94.2%', icon: '📈', color: 'from-purple-500 to-pink-600' },
-        ].map((stat, index) => (
-          <div key={index} className="glass-card p-6 hover:scale-105 transition-all duration-300">
-            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-2xl mb-4`}>
-              {stat.icon}
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {stat.value}
-            </div>
-            <div className="text-sm text-slate-400">
-              {stat.title}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="glass-card p-8">
-        <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
-        <div className="flex flex-wrap gap-4">
-          <button 
-            onClick={() => setActiveTab('suggestions')}
-            className="modern-button bg-gradient-to-r from-indigo-500 to-purple-600"
-          >
-            💡 Generate Code
-          </button>
-          <button 
-            onClick={() => setActiveTab('vectorization')}
-            className="modern-button bg-gradient-to-r from-emerald-500 to-teal-600"
-          >
-            📊 Vectorize Repo
-          </button>
-          <button 
-            onClick={() => setActiveTab('connections')}
-            className="modern-button bg-gradient-to-r from-amber-500 to-orange-600"
-          >
-            🔗 Check Status
-          </button>
-          <button 
-            onClick={() => setActiveTab('config')}
-            className="modern-button bg-gradient-to-r from-pink-500 to-rose-600"
-          >
-            ⚙️ Configure
-          </button>
-        </div>
-      </div>
-
-      {/* Recent Suggestions */}
-      {suggestions.length > 0 && (
-        <div className="glass-card p-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Recent Suggestions</h2>
-          <div className="space-y-4">
-            {suggestions.slice(0, 3).map((suggestion, index) => (
-              <div key={index} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-indigo-400 font-semibold">{suggestion.ticket_id}</span>
-                  <span className="text-emerald-400 text-sm">
-                    {(suggestion.confidence_score * 100).toFixed(1)}% confidence
-                  </span>
-                </div>
-                <p className="text-slate-300 text-sm mb-3">{suggestion.explanation}</p>
-                <div className="text-xs text-slate-500">{suggestion.file_path}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Enhanced Configuration Tab
-  const ConfigurationTab = () => (
-    <div className="space-y-8">
-      <div className="glass-card p-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Service Configuration</h2>
-        <p className="text-slate-400 mb-8">Configure your external integrations and AI models</p>
+      {/* System Status - Swiss Grid Layout */}
+      <div className="space-y-8">
+        <h2 className="text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
+          System Status
+        </h2>
         
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* OLLAMA Configuration */}
-          <div className="config-section">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-2xl mr-4">
-                🧠
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {connectionStatuses.map((status) => (
+            <div key={status.service} className="bg-white border border-gray-200 p-8 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-900 capitalize">
+                  {status.service}
+                </h3>
+                <span className={`text-2xl ${getStatusColor(status.status)}`}>
+                  {getStatusIcon(status.status)}
+                </span>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">OLLAMA AI</h3>
-                <p className="text-slate-400 text-sm">Local language model configuration</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">OLLAMA URL</label>
-                <input
-                  type="text"
-                  value={config.ollama_url || ''}
-                  onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
-                  className="modern-input"
-                  placeholder="http://localhost:11434"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Model Name</label>
-                <select
-                  value={config.ollama_model || ''}
-                  onChange={(e) => setConfig({...config, ollama_model: e.target.value})}
-                  className="modern-input"
-                >
-                  <option value="">Select Model</option>
-                  <option value="codellama">CodeLlama</option>
-                  <option value="codellama:13b">CodeLlama 13B</option>
-                  <option value="codellama:34b">CodeLlama 34B</option>
-                  <option value="deepseek-coder">DeepSeek Coder</option>
-                  <option value="magicoder">MagiCoder</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* GitLab Configuration */}
-          <div className="config-section">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-2xl mr-4">
-                🦊
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">GitLab</h3>
-                <p className="text-slate-400 text-sm">Source code repository integration</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">GitLab URL</label>
-                <input
-                  type="text"
-                  value={config.gitlab_url || ''}
-                  onChange={(e) => setConfig({...config, gitlab_url: e.target.value})}
-                  className="modern-input"
-                  placeholder="https://gitlab.example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Access Token</label>
-                <input
-                  type="password"
-                  value={config.gitlab_token || ''}
-                  onChange={(e) => setConfig({...config, gitlab_token: e.target.value})}
-                  className="modern-input"
-                  placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Target Repository</label>
-                <input
-                  type="text"
-                  value={config.target_repository || ''}
-                  onChange={(e) => setConfig({...config, target_repository: e.target.value})}
-                  className="modern-input"
-                  placeholder="group/ansible-automation"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* JIRA Configuration */}
-          <div className="config-section">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-2xl mr-4">
-                📋
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">JIRA</h3>
-                <p className="text-slate-400 text-sm">Issue tracking integration</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">JIRA URL</label>
-                <input
-                  type="text"
-                  value={config.jira_url || ''}
-                  onChange={(e) => setConfig({...config, jira_url: e.target.value})}
-                  className="modern-input"
-                  placeholder="https://company.atlassian.net"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Username/Email</label>
-                <input
-                  type="text"
-                  value={config.jira_username || ''}
-                  onChange={(e) => setConfig({...config, jira_username: e.target.value})}
-                  className="modern-input"
-                  placeholder="user@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">API Token</label>
-                <input
-                  type="password"
-                  value={config.jira_token || ''}
-                  onChange={(e) => setConfig({...config, jira_token: e.target.value})}
-                  className="modern-input"
-                  placeholder="API token from JIRA settings"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* PostgreSQL Configuration */}
-          <div className="config-section">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-2xl mr-4">
-                🐘
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">PostgreSQL + pgvector</h3>
-                <p className="text-slate-400 text-sm">Vector database for semantic search</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Host</label>
-                  <input
-                    type="text"
-                    value={config.postgres_host || ''}
-                    onChange={(e) => setConfig({...config, postgres_host: e.target.value})}
-                    className="modern-input"
-                    placeholder="localhost"
-                  />
+              
+              <div className="space-y-2">
+                <div className={`text-sm font-medium ${getStatusColor(status.status)}`}>
+                  {status.status.replace('_', ' ').toUpperCase()}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Port</label>
-                  <input
-                    type="number"
-                    value={config.postgres_port || ''}
-                    onChange={(e) => setConfig({...config, postgres_port: parseInt(e.target.value)})}
-                    className="modern-input"
-                    placeholder="5432"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Database</label>
-                <input
-                  type="text"
-                  value={config.postgres_db || ''}
-                  onChange={(e) => setConfig({...config, postgres_db: e.target.value})}
-                  className="modern-input"
-                  placeholder="vector_db"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Username</label>
-                <input
-                  type="text"
-                  value={config.postgres_user || ''}
-                  onChange={(e) => setConfig({...config, postgres_user: e.target.value})}
-                  className="modern-input"
-                  placeholder="postgres"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={config.postgres_password || ''}
-                  onChange={(e) => setConfig({...config, postgres_password: e.target.value})}
-                  className="modern-input"
-                  placeholder="Enter password"
-                />
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {status.message}
+                </p>
+                {status.response_time_ms && (
+                  <div className="text-xs text-gray-400">
+                    {status.response_time_ms.toFixed(0)}ms
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          ))}
         </div>
 
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={() => updateConfiguration(config)}
-            disabled={isLoading}
-            className="modern-button bg-gradient-to-r from-indigo-500 to-purple-600 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Saving...
-              </>
-            ) : (
-              <>💾 Save Configuration</>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Enhanced Connection Status Tab
-  const ConnectionsTab = () => (
-    <div className="space-y-8">
-      <div className="glass-card p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Service Status</h2>
-            <p className="text-slate-400">Monitor your external integrations in real-time</p>
-          </div>
+        <div className="text-center pt-8">
           <button
             onClick={checkAllConnections}
             disabled={isLoading}
-            className="modern-button bg-gradient-to-r from-cyan-500 to-blue-600"
+            className="px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Checking...
-              </>
-            ) : (
-              <>🔄 Refresh All</>
-            )}
+            {isLoading ? 'Checking...' : 'Refresh Status'}
           </button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {connectionStatuses.map((status) => (
-            <div key={status.service} className="status-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${
-                    status.service === 'ollama' ? 'from-purple-500 to-indigo-600' :
-                    status.service === 'gitlab' ? 'from-orange-500 to-red-600' :
-                    status.service === 'jira' ? 'from-blue-500 to-cyan-600' :
-                    'from-emerald-500 to-green-600'
-                  } flex items-center justify-center text-lg mr-3`}>
-                    {status.service === 'ollama' ? '🧠' :
-                     status.service === 'gitlab' ? '🦊' :
-                     status.service === 'jira' ? '📋' : '🐘'}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold capitalize text-white">{status.service}</h3>
-                    <p className="text-slate-400 text-sm">{
-                      status.service === 'ollama' ? 'AI Language Model' :
-                      status.service === 'gitlab' ? 'Source Control' :
-                      status.service === 'jira' ? 'Issue Tracking' : 'Vector Database'
-                    }</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <span className="text-2xl mr-2">{getStatusIcon(status.status)}</span>
-                  <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    status.status === 'connected' ? 'bg-emerald-500/20 text-emerald-400' :
-                    status.status === 'error' ? 'bg-red-500/20 text-red-400' :
-                    'bg-amber-500/20 text-amber-400'
-                  }`}>
-                    {status.status.replace('_', ' ').toUpperCase()}
-                  </div>
-                </div>
+      {/* Analytics Section */}
+      <div className="space-y-8">
+        <h2 className="text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
+          Analytics
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            { title: 'Total Suggestions', value: analytics.totalSuggestions, unit: '' },
+            { title: 'Avg Confidence', value: analytics.avgConfidence, unit: '%' },
+            { title: 'Successful MRs', value: analytics.successfulMRs, unit: '' },
+            { title: 'Processing Time', value: analytics.processingTime, unit: 's' },
+          ].map((metric, index) => (
+            <div key={index} className="bg-white border border-gray-200 p-8 text-center space-y-4">
+              <div className="text-4xl font-light text-gray-900">
+                {metric.value}{metric.unit}
               </div>
-              
-              <p className="text-slate-300 text-sm mb-4">{status.message}</p>
-              
-              {status.response_time_ms && (
-                <div className="flex items-center text-slate-500 text-xs mb-3">
-                  <span className="mr-2">⚡</span>
-                  Response time: {status.response_time_ms.toFixed(0)}ms
-                </div>
-              )}
-              
-              {status.details && (
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                  <pre className="text-xs text-slate-400 overflow-x-auto">
-                    {JSON.stringify(status.details, null, 2)}
-                  </pre>
-                </div>
-              )}
+              <div className="text-sm text-gray-600 font-medium">
+                {metric.title}
+              </div>
             </div>
           ))}
         </div>
@@ -624,101 +246,220 @@ function App() {
     </div>
   );
 
-  // Enhanced Vectorization Tab  
-  const VectorizationTab = () => (
-    <div className="space-y-8">
-      <div className="glass-card p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Repository Vectorization</h2>
-            <p className="text-slate-400">Process and index your Ansible codebase for semantic search</p>
+  // Search Tab - Clean Swiss Design
+  const SearchTab = () => (
+    <div className="space-y-12">
+      <div className="space-y-6">
+        <h1 className="text-4xl font-light text-gray-900 tracking-tight">
+          Code Search
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+          Search your codebase using natural language and semantic similarity
+        </p>
+      </div>
+
+      {/* Search Interface */}
+      <div className="bg-white border border-gray-200 p-8 space-y-6">
+        <div className="space-y-4">
+          <label className="block text-sm font-medium text-gray-900">
+            Search Query
+          </label>
+          <div className="flex space-x-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="e.g., ansible module for file operations"
+              className="flex-1 px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+              onKeyPress={(e) => e.key === 'Enter' && performCodeSearch()}
+            />
+            <button
+              onClick={performCodeSearch}
+              disabled={isLoading || !searchQuery.trim()}
+              className="px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {isLoading ? 'Searching...' : 'Search'}
+            </button>
           </div>
-          <div className="flex space-x-3">
+        </div>
+      </div>
+
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <div className="space-y-8">
+          <h2 className="text-2xl font-light text-gray-900">
+            {searchResults.length} Results for "{searchQuery}"
+          </h2>
+          
+          <div className="space-y-6">
+            {searchResults.map((result, index) => (
+              <div key={index} className="bg-white border border-gray-200 p-8 space-y-6">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {result.file_path}
+                    </h3>
+                    <div className="text-sm text-gray-600 space-x-6">
+                      <span>Similarity: {(result.similarity * 100).toFixed(1)}%</span>
+                      <span>Language: {result.language}</span>
+                      {result.function_name && (
+                        <span>Function: {result.function_name}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1 text-xs font-medium ${
+                    result.similarity > 0.8 ? 'bg-emerald-100 text-emerald-800' :
+                    result.similarity > 0.6 ? 'bg-amber-100 text-amber-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {result.similarity > 0.8 ? 'High Match' :
+                     result.similarity > 0.6 ? 'Good Match' : 'Low Match'}
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-6 border-l-4 border-gray-300">
+                  <pre className="text-sm text-gray-800 font-mono leading-relaxed overflow-x-auto">
+                    {result.content}
+                  </pre>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Results */}
+      {searchResults.length === 0 && searchQuery && !isLoading && (
+        <div className="text-center py-12 space-y-4">
+          <p className="text-lg text-gray-600">No results found for "{searchQuery}"</p>
+          <p className="text-sm text-gray-500">
+            Try different search terms or ensure your repository has been vectorized
+          </p>
+        </div>
+      )}
+
+      {/* Search Tips */}
+      {!searchQuery && (
+        <div className="bg-gray-50 border border-gray-200 p-8 space-y-6">
+          <h3 className="text-lg font-medium text-gray-900">Search Tips</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Natural Language</h4>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• "file upload functions"</li>
+                <li>• "error handling code"</li>
+                <li>• "database connection logic"</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Technical Terms</h4>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• "ansible module"</li>
+                <li>• "API endpoints"</li>
+                <li>• "configuration management"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Vectorization Tab - Minimal Design
+  const VectorizationTab = () => (
+    <div className="space-y-12">
+      <div className="space-y-6">
+        <h1 className="text-4xl font-light text-gray-900 tracking-tight">
+          Repository Vectorization
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+          Process and index your codebase for semantic search capabilities
+        </p>
+      </div>
+
+      <div className="bg-white border border-gray-200 p-8 space-y-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-light text-gray-900">Processing Status</h2>
+          <div className="space-x-4">
             <button
               onClick={getVectorizationStatus}
-              className="modern-button bg-gradient-to-r from-slate-600 to-slate-700"
+              className="px-6 py-2 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
             >
-              📊 Refresh Status
+              Refresh
             </button>
             <button
               onClick={startVectorization}
               disabled={isLoading}
-              className="modern-button bg-gradient-to-r from-emerald-500 to-teal-600"
+              className="px-6 py-2 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Processing...
-                </>
-              ) : (
-                <>🚀 Start Vectorization</>
-              )}
+              {isLoading ? 'Processing...' : 'Start Vectorization'}
             </button>
           </div>
         </div>
 
         {vectorizationStatus && (
-          <div className="space-y-6">
-            {/* Progress Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="metric-card">
-                <div className="text-3xl font-bold text-blue-400">{vectorizationStatus.total_files}</div>
-                <div className="text-sm text-slate-400">Total Files</div>
-                <div className="text-xs text-slate-500 mt-1">📁 Discovered</div>
-              </div>
-              <div className="metric-card">
-                <div className="text-3xl font-bold text-emerald-400">{vectorizationStatus.processed_files}</div>
-                <div className="text-sm text-slate-400">Processed</div>
-                <div className="text-xs text-slate-500 mt-1">✅ Completed</div>
-              </div>
-              <div className="metric-card">
-                <div className="text-3xl font-bold text-red-400">{vectorizationStatus.failed_files}</div>
-                <div className="text-sm text-slate-400">Failed</div>
-                <div className="text-xs text-slate-500 mt-1">❌ Errors</div>
-              </div>
-              <div className="metric-card">
-                <div className={`text-3xl font-bold ${
-                  vectorizationStatus.status === 'completed' ? 'text-emerald-400' : 
-                  vectorizationStatus.status === 'in_progress' ? 'text-amber-400' : 'text-slate-400'
-                }`}>
-                  {vectorizationStatus.status === 'completed' ? '✨' :
-                   vectorizationStatus.status === 'in_progress' ? '⚡' : '⏸️'}
+          <div className="space-y-8">
+            {/* Progress Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="text-center space-y-2">
+                <div className="text-3xl font-light text-gray-900">
+                  {vectorizationStatus.total_files}
                 </div>
-                <div className="text-sm text-slate-400">{vectorizationStatus.status.replace('_', ' ').toUpperCase()}</div>
-                <div className="text-xs text-slate-500 mt-1">Current Status</div>
+                <div className="text-sm text-gray-600">Total Files</div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="text-3xl font-light text-emerald-600">
+                  {vectorizationStatus.processed_files}
+                </div>
+                <div className="text-sm text-gray-600">Processed</div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className="text-3xl font-light text-red-600">
+                  {vectorizationStatus.failed_files}
+                </div>
+                <div className="text-sm text-gray-600">Failed</div>
+              </div>
+              <div className="text-center space-y-2">
+                <div className={`text-3xl font-light ${
+                  vectorizationStatus.status === 'completed' ? 'text-emerald-600' : 
+                  vectorizationStatus.status === 'in_progress' ? 'text-amber-600' : 'text-gray-400'
+                }`}>
+                  {vectorizationStatus.status === 'completed' ? '✓' :
+                   vectorizationStatus.status === 'in_progress' ? '⟳' : '⏸'}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {vectorizationStatus.status.replace('_', ' ').toUpperCase()}
+                </div>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-white font-semibold">Processing Progress</span>
-                <span className="text-slate-400 text-sm">
-                  {vectorizationStatus.total_files > 0 
-                    ? ((vectorizationStatus.processed_files / vectorizationStatus.total_files) * 100).toFixed(1)
-                    : 0}%
-                </span>
+            {vectorizationStatus.total_files > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Progress</span>
+                  <span>
+                    {((vectorizationStatus.processed_files / vectorizationStatus.total_files) * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 h-2">
+                  <div 
+                    className="bg-black h-2 transition-all duration-500"
+                    style={{ 
+                      width: `${(vectorizationStatus.processed_files / vectorizationStatus.total_files) * 100}%`
+                    }}
+                  ></div>
+                </div>
               </div>
-              <div className="progress-bar">
-                <div 
-                  className="progress-fill bg-gradient-to-r from-emerald-500 to-teal-600"
-                  style={{ 
-                    width: vectorizationStatus.total_files > 0 
-                      ? `${(vectorizationStatus.processed_files / vectorizationStatus.total_files) * 100}%`
-                      : '0%'
-                  }}
-                ></div>
-              </div>
-            </div>
+            )}
 
             {/* Details */}
             {vectorizationStatus.details && vectorizationStatus.details.length > 0 && (
-              <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-                <h4 className="text-white font-semibold mb-4">Processing Details</h4>
-                <div className="space-y-2">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900">Processing Details</h3>
+                <div className="bg-gray-50 p-6 space-y-2">
                   {vectorizationStatus.details.map((detail, index) => (
-                    <div key={index} className="flex items-center text-sm text-slate-300">
-                      <span className="text-cyan-400 mr-2">→</span>
+                    <div key={index} className="text-sm text-gray-700">
                       {detail}
                     </div>
                   ))}
@@ -731,334 +472,236 @@ function App() {
     </div>
   );
 
-  // Enhanced Code Search Tab
-  const CodeSearchTab = () => (
-    <div className="space-y-8">
-      <div className="glass-card p-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Semantic Code Search</h2>
-        <p className="text-slate-400 mb-8">Search your codebase using natural language and semantic similarity</p>
-        
-        {/* Search Section */}
-        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Search Query</label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="e.g., ansible module for file operations, error handling functions"
-                className="modern-input"
-                onKeyPress={(e) => e.key === 'Enter' && performCodeSearch()}
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={performCodeSearch}
-                disabled={isLoading || !searchQuery.trim()}
-                className="modern-button bg-gradient-to-r from-cyan-500 to-blue-600 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Searching...
-                  </>
-                ) : (
-                  <>🔍 Search Code</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Search Results</h3>
-              <div className="text-slate-400 text-sm">
-                Found {searchResults.length} matches for "{searchQuery}"
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {searchResults.map((result, index) => (
-                <div key={index} className="bg-slate-800/30 rounded-2xl p-6 border border-slate-700/50 hover:bg-slate-800/50 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${
-                        result.language === 'python' ? 'from-blue-500 to-indigo-600' :
-                        result.language === 'yaml' ? 'from-orange-500 to-red-600' :
-                        'from-gray-500 to-gray-600'
-                      } flex items-center justify-center text-lg`}>
-                        {result.language === 'python' ? '🐍' :
-                         result.language === 'yaml' ? '📄' : '📁'}
-                      </div>
-                      <div>
-                        <h4 className="text-white font-semibold">{result.file_path}</h4>
-                        <div className="flex items-center space-x-4 text-sm text-slate-400">
-                          <span>📊 Similarity: {(result.similarity * 100).toFixed(1)}%</span>
-                          <span>🔧 Language: {result.language}</span>
-                          {result.function_name && (
-                            <span>⚡ Function: {result.function_name}</span>
-                          )}
-                          <span>📈 Complexity: {result.complexity_score}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      result.similarity > 0.8 ? 'bg-emerald-500/20 text-emerald-400' :
-                      result.similarity > 0.6 ? 'bg-amber-500/20 text-amber-400' :
-                      'bg-slate-500/20 text-slate-400'
-                    }`}>
-                      {result.similarity > 0.8 ? 'High Match' :
-                       result.similarity > 0.6 ? 'Good Match' : 'Low Match'}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
-                    <h5 className="text-slate-300 font-semibold mb-2 flex items-center">
-                      <span className="mr-2">📋</span>
-                      Code Preview
-                    </h5>
-                    <pre className="text-sm text-slate-300 overflow-x-auto leading-relaxed">
-                      <code>{result.content}</code>
-                    </pre>
-                  </div>
-                  
-                  <div className="flex justify-end mt-4 space-x-2">
-                    <button className="modern-button bg-gradient-to-r from-slate-600 to-slate-700">
-                      📋 Copy Code
-                    </button>
-                    <button className="modern-button bg-gradient-to-r from-indigo-500 to-purple-600">
-                      🔗 Open File
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Search Tips */}
-        {searchResults.length === 0 && searchQuery && !isLoading && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6">
-            <h4 className="text-amber-400 font-semibold mb-2 flex items-center">
-              <span className="mr-2">💡</span>
-              No results found
-            </h4>
-            <p className="text-amber-300 text-sm">
-              Try different search terms or make sure your repository has been vectorized first.
-            </p>
-          </div>
-        )}
-
-        {/* Search Tips */}
-        {!searchQuery && (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
-            <h4 className="text-blue-400 font-semibold mb-3 flex items-center">
-              <span className="mr-2">💡</span>
-              Search Tips
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-blue-300 text-sm">
-              <div>
-                <strong>Natural Language:</strong>
-                <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li>"file upload functions"</li>
-                  <li>"error handling code"</li>
-                  <li>"database connection logic"</li>
-                </ul>
-              </div>
-              <div>
-                <strong>Technical Terms:</strong>
-                <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li>"ansible module"</li>
-                  <li>"API endpoints"</li>
-                  <li>"configuration management"</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
+  // Configuration Tab - Clean Form Design
+  const ConfigurationTab = () => (
+    <div className="space-y-12">
+      <div className="space-y-6">
+        <h1 className="text-4xl font-light text-gray-900 tracking-tight">
+          Configuration
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+          Configure your external integrations and AI models
+        </p>
       </div>
-    </div>
-  );
-
-  // Enhanced Code Suggestions Tab
-  const CodeSuggestionsTab = () => (
-    <div className="space-y-8">
-      <div className="glass-card p-8">
-        <h2 className="text-3xl font-bold text-white mb-2">AI Code Suggestions</h2>
-        <p className="text-slate-400 mb-8">Generate intelligent code suggestions from JIRA tickets</p>
-        
-        {/* Input Section */}
-        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-slate-300 mb-2">JIRA Ticket ID</label>
+      
+      <div className="space-y-12">
+        {/* OLLAMA Configuration */}
+        <div className="bg-white border border-gray-200 p-8 space-y-6">
+          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+            OLLAMA AI
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">OLLAMA URL</label>
               <input
                 type="text"
-                value={jiraTicketId}
-                onChange={(e) => setJiraTicketId(e.target.value)}
-                placeholder="e.g., PROJ-123, ANSIBLE-456"
-                className="modern-input"
+                value={config.ollama_url || ''}
+                onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="http://localhost:11434"
               />
             </div>
-            <div className="flex items-end">
-              <button
-                onClick={generateCodeSuggestion}
-                disabled={isLoading || !jiraTicketId.trim()}
-                className="modern-button bg-gradient-to-r from-indigo-500 to-purple-600 disabled:opacity-50"
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Model Name</label>
+              <select
+                value={config.ollama_model || ''}
+                onChange={(e) => setConfig({...config, ollama_model: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Generating...
-                  </>
-                ) : (
-                  <>✨ Generate Code</>
-                )}
-              </button>
+                <option value="">Select Model</option>
+                <option value="codellama">CodeLlama</option>
+                <option value="codellama:13b">CodeLlama 13B</option>
+                <option value="codellama:34b">CodeLlama 34B</option>
+                <option value="deepseek-coder">DeepSeek Coder</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Code Suggestion Display */}
-        {codeSuggestion && (
+        {/* GitLab Configuration */}
+        <div className="bg-white border border-gray-200 p-8 space-y-6">
+          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+            GitLab
+          </h2>
           <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl border border-indigo-500/30">
-              <div>
-                <h3 className="text-xl font-bold text-white">Code Suggestion for {codeSuggestion.ticket_id}</h3>
-                <div className="flex items-center space-x-4 mt-2">
-                  <span className="text-emerald-400 text-sm font-semibold">
-                    🎯 {(codeSuggestion.confidence_score * 100).toFixed(1)}% Confidence
-                  </span>
-                  <span className="text-slate-400 text-sm">
-                    📁 {codeSuggestion.file_path}
-                  </span>
-                </div>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={createMergeRequest}
-                  disabled={isLoading}
-                  className="modern-button bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating MR...
-                    </>
-                  ) : (
-                    <>🚀 Create Merge Request</>
-                  )}
-                </button>
-              </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">GitLab URL</label>
+              <input
+                type="text"
+                value={config.gitlab_url || ''}
+                onChange={(e) => setConfig({...config, gitlab_url: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="https://gitlab.example.com"
+              />
             </div>
-
-            {/* Explanation */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-              <h4 className="text-white font-semibold mb-3 flex items-center">
-                <span className="mr-2">💡</span>
-                Explanation
-              </h4>
-              <p className="text-slate-300 leading-relaxed">{codeSuggestion.explanation}</p>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Access Token</label>
+              <input
+                type="password"
+                value={config.gitlab_token || ''}
+                onChange={(e) => setConfig({...config, gitlab_token: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
+              />
             </div>
-
-            {/* Code Display */}
-            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700">
-              <div className="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
-                <h4 className="text-white font-semibold flex items-center">
-                  <span className="mr-2">🔧</span>
-                  Suggested Code Changes
-                </h4>
-                <div className="flex space-x-2">
-                  <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">Python</span>
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">Ansible</span>
-                </div>
-              </div>
-              <div className="p-6 overflow-x-auto">
-                <pre className="text-sm text-slate-300 leading-relaxed">
-                  <code>{codeSuggestion.suggested_code}</code>
-                </pre>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between items-center p-6 bg-slate-800/30 rounded-2xl border border-slate-700">
-              <div className="text-slate-400 text-sm">
-                ⏰ Generated {new Date(codeSuggestion.created_at).toLocaleString()}
-              </div>
-              <div className="flex space-x-3">
-                <button className="modern-button bg-gradient-to-r from-slate-600 to-slate-700">
-                  📋 Copy Code
-                </button>
-                <button className="modern-button bg-gradient-to-r from-amber-500 to-orange-600">
-                  🔄 Regenerate
-                </button>
-              </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Target Repository</label>
+              <input
+                type="text"
+                value={config.target_repository || ''}
+                onChange={(e) => setConfig({...config, target_repository: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="group/ansible-automation"
+              />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* JIRA Configuration */}
+        <div className="bg-white border border-gray-200 p-8 space-y-6">
+          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+            JIRA
+          </h2>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">JIRA URL</label>
+              <input
+                type="text"
+                value={config.jira_url || ''}
+                onChange={(e) => setConfig({...config, jira_url: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="https://company.atlassian.net"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Username/Email</label>
+              <input
+                type="text"
+                value={config.jira_username || ''}
+                onChange={(e) => setConfig({...config, jira_username: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="user@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">API Token</label>
+              <input
+                type="password"
+                value={config.jira_token || ''}
+                onChange={(e) => setConfig({...config, jira_token: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="API token from JIRA settings"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* PostgreSQL Configuration */}
+        <div className="bg-white border border-gray-200 p-8 space-y-6">
+          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+            PostgreSQL + pgvector
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Host</label>
+              <input
+                type="text"
+                value={config.postgres_host || ''}
+                onChange={(e) => setConfig({...config, postgres_host: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="localhost"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Port</label>
+              <input
+                type="number"
+                value={config.postgres_port || ''}
+                onChange={(e) => setConfig({...config, postgres_port: parseInt(e.target.value)})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="5432"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Database</label>
+              <input
+                type="text"
+                value={config.postgres_db || ''}
+                onChange={(e) => setConfig({...config, postgres_db: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="vector_db"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Username</label>
+              <input
+                type="text"
+                value={config.postgres_user || ''}
+                onChange={(e) => setConfig({...config, postgres_user: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="postgres"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">Password</label>
+              <input
+                type="password"
+                value={config.postgres_password || ''}
+                onChange={(e) => setConfig({...config, postgres_password: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                placeholder="Enter password"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center pt-8">
+          <button
+            onClick={() => updateConfiguration(config)}
+            disabled={isLoading}
+            className="px-12 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {isLoading ? 'Saving...' : 'Save Configuration'}
+          </button>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Background Effects */}
-      <div className="fixed inset-0 bg-[url('https://images.unsplash.com/photo-1618397746666-63405ce5d015')] bg-cover bg-center opacity-5"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-indigo-900/20 to-purple-900/20"></div>
-      
-      {/* Header */}
-      <header className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+    <div className="min-h-screen bg-white">
+      {/* Clean Header - Swiss Design */}
+      <header className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl">
-                🤖
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">RAG Code Assistant</h1>
-                <p className="text-slate-400 text-sm">AI-Powered Development Automation</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="glass-card px-4 py-2">
-                <span className="text-emerald-400 text-sm font-semibold">🟢 Online</span>
-              </div>
-              <button className="w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                ⚙️
-              </button>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-black"></div>
+              <h1 className="text-xl font-medium text-gray-900">RAG Assistant</h1>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navigation */}
-      <nav className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex space-x-8 overflow-x-auto">
+      {/* Clean Navigation */}
+      <nav className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="flex space-x-12">
             {[
-              { id: 'dashboard', name: 'Dashboard', icon: '📊' },
-              { id: 'suggestions', name: 'Code Suggestions', icon: '💡' },
-              { id: 'search', name: 'Code Search', icon: '🔍' },
-              { id: 'vectorization', name: 'Vectorization', icon: '📈' },
-              { id: 'connections', name: 'Status', icon: '🔗' },
-              { id: 'config', name: 'Configuration', icon: '⚙️' },
+              { id: 'dashboard', name: 'Dashboard' },
+              { id: 'search', name: 'Search' },
+              { id: 'vectorization', name: 'Vectorization' },
+              { id: 'config', name: 'Configuration' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-4 px-3 font-medium transition-all duration-300 border-b-2 whitespace-nowrap ${
+                className={`py-4 font-medium transition-colors border-b-2 ${
                   activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-300'
+                    ? 'border-black text-gray-900'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span className="text-lg">{tab.icon}</span>
-                <span>{tab.name}</span>
+                {tab.name}
               </button>
             ))}
           </div>
@@ -1066,15 +709,11 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {activeTab === 'dashboard' && <DashboardTab />}
-          {activeTab === 'suggestions' && <CodeSuggestionsTab />}
-          {activeTab === 'search' && <CodeSearchTab />}
-          {activeTab === 'vectorization' && <VectorizationTab />}
-          {activeTab === 'connections' && <ConnectionsTab />}
-          {activeTab === 'config' && <ConfigurationTab />}
-        </div>
+      <main className="max-w-7xl mx-auto px-8 py-12">
+        {activeTab === 'dashboard' && <DashboardTab />}
+        {activeTab === 'search' && <SearchTab />}
+        {activeTab === 'vectorization' && <VectorizationTab />}
+        {activeTab === 'config' && <ConfigurationTab />}
       </main>
     </div>
   );

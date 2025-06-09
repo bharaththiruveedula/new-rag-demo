@@ -2,64 +2,168 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 2025 Modern Design System */
+/* Swiss Design System - Clean & Minimal */
+@layer base {
+  /* Typography */
+  body {
+    @apply font-sans antialiased;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-light tracking-tight;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+}
+
 @layer components {
-  /* Glass Morphism Cards */
-  .glass-card {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+  /* Clean Form Elements */
+  .form-input {
+    @apply w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 placeholder-gray-500;
+    @apply focus:border-black focus:outline-none transition-colors;
   }
-
-  /* Modern Buttons */
-  .modern-button {
-    @apply px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 border-0;
+  
+  .form-select {
+    @apply w-full px-4 py-3 border border-gray-300 bg-white text-gray-900;
+    @apply focus:border-black focus:outline-none transition-colors;
   }
-
-  /* Modern Input Fields */
-  .modern-input {
-    @apply w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300;
+  
+  /* Button Styles */
+  .btn-primary {
+    @apply px-8 py-3 bg-black text-white font-medium;
+    @apply hover:bg-gray-800 transition-colors;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black;
   }
-
-  /* Configuration Sections */
-  .config-section {
-    @apply bg-slate-800/30 rounded-2xl p-6 border border-slate-700/50 backdrop-blur-sm;
+  
+  .btn-secondary {
+    @apply px-6 py-2 border border-gray-300 text-gray-700 font-medium bg-white;
+    @apply hover:bg-gray-50 transition-colors;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300;
   }
-
-  /* Status Cards */
-  .status-card {
-    @apply bg-slate-800/30 rounded-2xl p-6 border border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-all duration-300;
+  
+  /* Card Components */
+  .card {
+    @apply bg-white border border-gray-200;
   }
-
-  /* Metric Cards */
-  .metric-card {
-    @apply bg-slate-800/30 rounded-2xl p-6 border border-slate-700/50 backdrop-blur-sm text-center hover:scale-105 transition-all duration-300;
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-sm;
   }
-
-  /* Progress Bar */
-  .progress-bar {
-    @apply w-full bg-slate-700/50 rounded-full h-3 overflow-hidden backdrop-blur-sm;
+  
+  /* Status Indicators */
+  .status-dot {
+    @apply inline-block w-2 h-2 rounded-full;
   }
-
-  .progress-fill {
-    @apply h-full transition-all duration-500 ease-out rounded-full;
+  
+  .status-connected {
+    @apply text-emerald-500;
+  }
+  
+  .status-error {
+    @apply text-red-500;
+  }
+  
+  .status-warning {
+    @apply text-amber-500;
+  }
+  
+  .status-neutral {
+    @apply text-gray-400;
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Swiss Grid System */
+.swiss-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-slate-800/50 rounded-full;
+.swiss-grid-2 {
+  grid-column: span 2;
 }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-600/50 rounded-full hover:bg-slate-500/50;
+.swiss-grid-3 {
+  grid-column: span 3;
 }
 
-/* Smooth Animations */
+.swiss-grid-4 {
+  grid-column: span 4;
+}
+
+.swiss-grid-6 {
+  grid-column: span 6;
+}
+
+.swiss-grid-8 {
+  grid-column: span 8;
+}
+
+.swiss-grid-12 {
+  grid-column: span 12;
+}
+
+/* Typography Scale */
+.text-display {
+  @apply text-5xl font-light tracking-tight leading-tight;
+}
+
+.text-headline {
+  @apply text-3xl font-light tracking-tight;
+}
+
+.text-title {
+  @apply text-xl font-medium;
+}
+
+.text-body {
+  @apply text-base leading-relaxed;
+}
+
+.text-caption {
+  @apply text-sm text-gray-600;
+}
+
+.text-overline {
+  @apply text-xs font-medium uppercase tracking-wider text-gray-500;
+}
+
+/* Spacing System */
+.space-section {
+  @apply space-y-12;
+}
+
+.space-component {
+  @apply space-y-8;
+}
+
+.space-element {
+  @apply space-y-4;
+}
+
+.space-tight {
+  @apply space-y-2;
+}
+
+/* Clean Animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -70,305 +174,247 @@
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* Focus States */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black;
 }
 
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.animate-slideIn {
-  animation: slideIn 0.6s ease-out;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Gradient Text */
-.gradient-text {
-  @apply bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent;
-}
-
-/* Floating Elements */
-.floating {
-  animation: floating 6s ease-in-out infinite;
-}
-
-@keyframes floating {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* Code Syntax Highlighting */
+/* Code Display */
 .code-block {
-  @apply bg-slate-900 text-slate-300 rounded-xl overflow-x-auto;
+  @apply bg-gray-50 border-l-4 border-gray-300 p-6;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
-.code-keyword {
-  @apply text-purple-400 font-semibold;
+.code-inline {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
-.code-string {
-  @apply text-emerald-400;
+/* Progress Indicators */
+.progress-bar {
+  @apply w-full bg-gray-200 h-2 overflow-hidden;
 }
 
-.code-comment {
-  @apply text-slate-500 italic;
-}
-
-.code-function {
-  @apply text-yellow-400;
-}
-
-.code-variable {
-  @apply text-blue-400;
-}
-
-/* Diff Styles */
-.diff-added {
-  @apply bg-emerald-500/10 border-l-4 border-emerald-500 pl-4 text-emerald-400;
-}
-
-.diff-removed {
-  @apply bg-red-500/10 border-l-4 border-red-500 pl-4 text-red-400;
-}
-
-.diff-context {
-  @apply bg-slate-700/10 border-l-4 border-slate-500 pl-4 text-slate-400;
-}
-
-/* Status Indicators */
-.status-dot {
-  @apply inline-block w-3 h-3 rounded-full;
-}
-
-.status-connected {
-  @apply bg-emerald-500 shadow-lg shadow-emerald-500/50;
-}
-
-.status-error {
-  @apply bg-red-500 shadow-lg shadow-red-500/50;
-}
-
-.status-warning {
-  @apply bg-amber-500 shadow-lg shadow-amber-500/50;
-}
-
-.status-offline {
-  @apply bg-slate-500;
-}
-
-/* Hover Effects */
-.hover-lift {
-  @apply transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl;
-}
-
-.hover-glow {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25;
+.progress-fill {
+  @apply bg-black h-full transition-all duration-500 ease-out;
 }
 
 /* Loading States */
-.loading-shimmer {
-  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+.loading {
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes shimmer {
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
   0% {
-    background-position: -200% 0;
+    left: -100%;
   }
   100% {
-    background-position: 200% 0;
+    left: 100%;
   }
 }
 
-/* Responsive Design */
+/* Responsive Breakpoints */
 @media (max-width: 768px) {
-  .glass-card {
-    @apply mx-2;
+  .swiss-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
-  .modern-button {
-    @apply text-sm px-4 py-2;
+  .text-display {
+    @apply text-3xl;
   }
   
-  .grid-responsive {
-    @apply grid-cols-1;
-  }
-}
-
-@media (max-width: 640px) {
-  .modern-input {
-    @apply text-sm;
+  .text-headline {
+    @apply text-2xl;
   }
   
-  .config-section {
-    @apply p-4;
+  .space-section {
+    @apply space-y-8;
   }
   
-  .status-card {
-    @apply p-4;
+  .space-component {
+    @apply space-y-6;
   }
-}
-
-/* Focus States */
-.modern-input:focus {
-  @apply ring-2 ring-indigo-500/50 border-indigo-500;
-}
-
-.modern-button:focus {
-  @apply outline-none ring-2 ring-offset-2 ring-offset-slate-900 ring-indigo-500;
-}
-
-/* Dark Mode Optimizations */
-body {
-  @apply bg-slate-900 text-white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-}
-
-/* Selection Colors */
-::selection {
-  @apply bg-indigo-500/30 text-white;
-}
-
-::-moz-selection {
-  @apply bg-indigo-500/30 text-white;
-}
-
-/* Backdrop Filters */
-.backdrop-glass {
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-/* Custom Transitions */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Grid Layouts */
-.grid-auto-fit {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.grid-auto-fill {
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-}
-
-/* Typography */
-.heading-xl {
-  @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
-}
-
-.heading-lg {
-  @apply text-2xl md:text-3xl lg:text-4xl font-bold leading-tight;
-}
-
-.text-balance {
-  text-wrap: balance;
-}
-
-/* Advanced Layouts */
-.container-glass {
-  @apply max-w-7xl mx-auto px-6 lg:px-8;
-}
-
-.section-spacing {
-  @apply py-12 md:py-16 lg:py-20;
-}
-
-/* Micro-interactions */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-  }
-}
-
-.pulse-on-hover:hover {
-  animation: pulse-glow 1.5s infinite;
-}
-
-/* 3D Effects */
-.card-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.6s;
-}
-
-.card-3d:hover {
-  transform: rotateY(10deg) rotateX(5deg);
-}
-
-/* Advanced Gradients */
-.gradient-mesh {
-  background: 
-    radial-gradient(at 40% 20%, hsla(228,100%,74%,1) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
-    radial-gradient(at 40% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
-    radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
-    radial-gradient(at 40% 80%, hsla(28,100%,74%,1) 0px, transparent 50%),
-    radial-gradient(at 80% 80%, hsla(242,100%,70%,1) 0px, transparent 50%),
-    radial-gradient(at 40% 40%, hsla(187,100%,78%,1) 0px, transparent 50%);
-}
-
-/* Performance Optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-.gpu-accelerated {
-  transform: translateZ(0);
-}
-
-/* Accessibility */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Focus Indicators */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900;
 }
 
 /* Print Styles */
 @media print {
-  .glass-card {
-    @apply bg-white text-black border border-gray-300;
+  .no-print {
+    display: none !important;
   }
   
-  .modern-button {
-    @apply bg-gray-200 text-black;
+  body {
+    @apply text-black bg-white;
   }
+  
+  .card {
+    @apply border border-gray-400;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    @apply border border-gray-400 bg-white text-black;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-black;
+  }
+  
+  .form-input,
+  .form-select {
+    @apply border-2 border-black;
+  }
+  
+  .btn-primary {
+    @apply border-2 border-black;
+  }
+  
+  .btn-secondary {
+    @apply border-2 border-black bg-white text-black;
+  }
+}
+
+/* Dark Mode Support (if needed) */
+@media (prefers-color-scheme: dark) {
+  /* Currently maintaining light theme as per design */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Selection */
+::selection {
+  @apply bg-black text-white;
+}
+
+/* Clean Table Styles */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply text-left font-medium text-gray-900 border-b border-gray-200 pb-2;
+}
+
+td {
+  @apply text-gray-700 border-b border-gray-100 py-3;
+}
+
+/* Form Validation */
+.form-error {
+  @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+}
+
+.form-success {
+  @apply border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500;
+}
+
+/* Utility Classes */
+.max-w-readable {
+  max-width: 65ch;
+}
+
+.aspect-golden {
+  aspect-ratio: 1.618 / 1;
+}
+
+.border-hairline {
+  border-width: 0.5px;
+}
+
+/* Swiss Typography Scale */
+.text-nano {
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+}
+
+.text-micro {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.text-small {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-large {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.text-5xl {
+  font-size: 3rem;
+  line-height: 1;
 }
