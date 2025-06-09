@@ -313,6 +313,10 @@ def main():
     print("\n🔍 Testing OLLAMA Model Fetching after URL update...")
     tester.test_check_service_connection("ollama")
     
+    # Test OLLAMA fallback behavior with invalid URL
+    print("\n🔍 Testing OLLAMA Fallback Behavior...")
+    tester.test_ollama_model_fallback()
+    
     # Test connection status endpoints
     tester.test_check_all_connections()
     
