@@ -777,41 +777,17 @@ ${lines.map(line => '+' + line).join('\n')}`;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Verizon-style Header */}
+      {/* Clean Header - App Focused */}
       <header className="bg-black text-white">
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-red-600"></div>
-                <h1 className="text-xl font-medium">RAG Assistant</h1>
-              </div>
-              <nav className="hidden md:flex items-center space-x-8">
-                <a href="#" className="text-sm hover:text-gray-300 transition-colors">Solutions</a>
-                <a href="#" className="text-sm hover:text-gray-300 transition-colors">Support</a>
-                <a href="#" className="text-sm hover:text-gray-300 transition-colors">Documentation</a>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-sm hover:text-gray-300 transition-colors">Sign In</button>
-              <button className="px-4 py-2 bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors">
-                Get Started
-              </button>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-red-600"></div>
+              <h1 className="text-xl font-medium">RAG Assistant</h1>
             </div>
           </div>
         </div>
       </header>
-
-      {/* Breadcrumb Navigation */}
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-3">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>RAG Assistant</span>
-            <span>›</span>
-            <span className="text-gray-900 font-medium capitalize">{activeTab}</span>
-          </div>
-        </div>
-      </div>
 
       {/* Main Navigation */}
       <nav className="border-b border-gray-200 bg-white">
