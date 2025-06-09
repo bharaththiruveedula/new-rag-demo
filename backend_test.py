@@ -174,18 +174,18 @@ class RAGCodeSuggestionAPITester:
             print(f"Explanation: {suggestion['explanation']}")
         return success
 
-    def test_create_merge_request(self, ticket_id):
-        """Test creating a merge request"""
+    def test_get_analytics(self):
+        """Test getting system analytics and metrics"""
         success, response = self.run_test(
-            "Create Merge Request",
-            "POST",
-            "gitlab/merge-request",
-            200,
-            params={"ticket_id": ticket_id}
+            "Get Analytics",
+            "GET",
+            "analytics",
+            200
         )
         if success:
-            result = response.json()
-            print(f"Merge Request Created: {result['message']} - URL: {result['merge_request_url']}")
+            analytics = response.json()
+            print(f"Analytics - Total Suggestions: {analytics.get('total_suggestions')} - Avg Confidence: {analytics.get('avg_confidence')}%")
+            print(f"Successful MRs: {analytics.get('successful_merge_requests')} - Avg Processing Time: {analytics.get('avg_processing_time')}s")
         return success
         
     def test_search_code(self, query):
