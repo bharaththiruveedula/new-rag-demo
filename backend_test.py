@@ -218,22 +218,45 @@ class RAGCodeSuggestionAPITester:
                 print(f"  {i+1}. {result.get('file_path')} - Similarity: {result.get('similarity'):.2f}")
         return success
 
-    def print_summary(self):
-        """Print test summary"""
-        print("\n" + "="*50)
-        print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
-        print("="*50)
+    def test_ollama_model_fallback(self):
+        """Test OLLAMA model fallback behavior with invalid URL"""
+        # First update config with invalid OLLAMA URL
+        invalid_config = {
+            "ollama_url": "http://invalid-ollama-url:11434"
+        }
+        self.run_test(
+            "Update Config with Invalid OLLAMA URL",
+            "POST",
+            "config",
+            200,
+            data=invalid_config
+        )
         
-        for i, result in enumerate(self.test_results):
-            status_icon = "✅" if result["status"] == "PASS" else "❌"
-            print(f"{i+1}. {status_icon} {result['name']} - {result['status']}")
+        # Then check OLLAMA status to see fallback behavior
+        success, response = self.run_test(
+            "Check OLLAMA Fallback Behavior",
+            "GET",
+            "status/ollama",
+            200
+        )
         
-        print("="*50)
-        
-        if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed!")
-        else:
-            print(f"❌ {self.tests_run - self.tests_passed} tests failed")
+        if success:
+            status = response.json()
+            print(f"OLLAMA Fallback Status: {status['status']} - Message: {status['message']}")
+            
+            # Check if status indicates error (which is expected)
+            if status['status'] == 'error':
+                print("✅ Correctly reported error status with invalid OLLAMA URL")
+            else:
+                print("⚠️ Unexpected status with invalid OLLAMA URL")
+                
+            # Even with error, the API should still return a valid response
+            if 'service' in status and status['service'] == 'ollama':
+                print("✅ API returned valid response structure despite error")
+            else:
+                print("❌ API response structure is invalid")
+                
+        return success
 
 def main():
     tester = RAGCodeSuggestionAPITester()
