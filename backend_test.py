@@ -202,21 +202,22 @@ class RAGCodeSuggestionAPITester:
             print(f"Successful MRs: {analytics.get('successful_merge_requests')} - Avg Processing Time: {analytics.get('avg_processing_time')}s")
         return success
         
-    def test_search_code(self, query):
-        """Test semantic code search"""
-        success, response = self.run_test(
-            "Search Code",
-            "GET",
-            f"search/code",
-            200,
-            params={"query": query}
-        )
-        if success:
-            results = response.json()
-            print(f"Search Results for '{query}' - Found {len(results.get('results', []))} matches")
-            for i, result in enumerate(results.get('results', [])[:3]):  # Show first 3 results
-                print(f"  {i+1}. {result.get('file_path')} - Similarity: {result.get('similarity'):.2f}")
-        return success
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "="*50)
+        print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
+        print("="*50)
+        
+        for i, result in enumerate(self.test_results):
+            status_icon = "✅" if result["status"] == "PASS" else "❌"
+            print(f"{i+1}. {status_icon} {result['name']} - {result['status']}")
+        
+        print("="*50)
+        
+        if self.tests_passed == self.tests_run:
+            print("🎉 All tests passed!")
+        else:
+            print(f"❌ {self.tests_run - self.tests_passed} tests failed")
 
     def test_ollama_model_fallback(self):
         """Test OLLAMA model fallback behavior with invalid URL"""
