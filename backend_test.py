@@ -80,17 +80,27 @@ class RAGCodeSuggestionAPITester:
             print(f"Configuration retrieved: {json.dumps(response.json(), indent=2)}")
         return success
 
-    def test_update_config(self, config_update):
-        """Test updating the configuration"""
+    def test_check_all_connections(self):
+        """Test checking all service connections"""
         success, response = self.run_test(
-            "Update Configuration",
-            "POST",
-            "config",
-            200,
-            data=config_update
+            "Check All Connections",
+            "GET",
+            "status/all",
+            200
         )
         if success:
-            print(f"Configuration updated: {json.dumps(response.json(), indent=2)}")
+            statuses = response.json()
+            for status in statuses:
+                print(f"Service: {status['service']} - Status: {status['status']} - Message: {status['message']}")
+                
+                # Check if OLLAMA models are included in the response
+                if status['service'] == 'ollama' and status.get('details') and 'available_models' in status['details']:
+                    models = status['details']['available_models']
+                    print(f"OLLAMA models in 'status/all' response: {models}")
+                    if models:
+                        print(f"✅ 'status/all' endpoint includes OLLAMA models")
+                    else:
+                        print("⚠️ 'status/all' endpoint returned empty OLLAMA models list")
         return success
 
     def test_vectorize_repository(self):
