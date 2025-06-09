@@ -129,16 +129,17 @@ class RAGCodeSuggestionAPITester:
                     print("⚠️ No OLLAMA models returned")
         return success
 
-    def test_vectorize_repository(self):
-        """Test starting repository vectorization"""
+    def test_get_vectorization_status(self):
+        """Test getting vectorization status"""
         success, response = self.run_test(
-            "Start Repository Vectorization",
-            "POST",
-            "vectorize/repository",
+            "Get Vectorization Status",
+            "GET",
+            "vectorize/status",
             200
         )
         if success:
-            print(f"Vectorization started: {json.dumps(response.json(), indent=2)}")
+            status = response.json()
+            print(f"Vectorization Status: {status['status']} - Total Files: {status['total_files']} - Processed: {status['processed_files']} - Failed: {status['failed_files']}")
         return success
 
     def test_suggest_code(self, ticket_id):
