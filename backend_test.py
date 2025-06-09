@@ -154,24 +154,18 @@ class RAGCodeSuggestionAPITester:
             print(f"Vectorization Status: {status['status']} - Total Files: {status['total_files']} - Processed: {status['processed_files']} - Failed: {status['failed_files']}")
         return success
 
-    def test_suggest_code(self, ticket_id):
-        """Test generating code suggestion"""
+    def test_create_merge_request(self, ticket_id):
+        """Test creating a merge request"""
         success, response = self.run_test(
-            "Generate Code Suggestion",
+            "Create Merge Request",
             "POST",
-            "suggest/code",
+            "gitlab/merge-request",
             200,
-            data={"ticket_id": ticket_id}
+            params={"ticket_id": ticket_id}
         )
         if success:
-            suggestion = response.json()
-            print(f"Code Suggestion for {suggestion['ticket_id']} - Confidence: {suggestion['confidence_score']}")
-            if 'suggested_changes' in suggestion and suggestion['suggested_changes']:
-                change = suggestion['suggested_changes'][0]
-                print(f"File Path: {change.get('file_path', 'N/A')}")
-                print(f"Change Type: {change.get('change_type', 'N/A')}")
-                print(f"Content Preview: {change.get('content', '')[:100]}...")
-            print(f"Explanation: {suggestion['explanation']}")
+            result = response.json()
+            print(f"Merge Request Created: {result['message']} - URL: {result['merge_request_url']}")
         return success
 
     def test_get_analytics(self):
