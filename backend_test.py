@@ -141,17 +141,24 @@ class RAGCodeSuggestionAPITester:
             print(f"Vectorization started: {json.dumps(response.json(), indent=2)}")
         return success
 
-    def test_get_vectorization_status(self):
-        """Test getting vectorization status"""
+    def test_suggest_code(self, ticket_id):
+        """Test generating code suggestion"""
         success, response = self.run_test(
-            "Get Vectorization Status",
-            "GET",
-            "vectorize/status",
-            200
+            "Generate Code Suggestion",
+            "POST",
+            "suggest/code",
+            200,
+            data={"ticket_id": ticket_id}
         )
         if success:
-            status = response.json()
-            print(f"Vectorization Status: {status['status']} - Total Files: {status['total_files']} - Processed: {status['processed_files']} - Failed: {status['failed_files']}")
+            suggestion = response.json()
+            print(f"Code Suggestion for {suggestion['ticket_id']} - Confidence: {suggestion['confidence_score']}")
+            if 'suggested_changes' in suggestion and suggestion['suggested_changes']:
+                change = suggestion['suggested_changes'][0]
+                print(f"File Path: {change.get('file_path', 'N/A')}")
+                print(f"Change Type: {change.get('change_type', 'N/A')}")
+                print(f"Content Preview: {change.get('content', '')[:100]}...")
+            print(f"Explanation: {suggestion['explanation']}")
         return success
 
     def test_create_merge_request(self, ticket_id):
