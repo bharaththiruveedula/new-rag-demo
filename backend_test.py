@@ -118,6 +118,15 @@ class RAGCodeSuggestionAPITester:
         if success:
             status = response.json()
             print(f"Service: {status['service']} - Status: {status['status']} - Message: {status['message']}")
+            
+            # For OLLAMA, check if models are returned
+            if service == "ollama" and status.get('details') and 'available_models' in status['details']:
+                models = status['details']['available_models']
+                print(f"Available OLLAMA models: {models}")
+                if models:
+                    print(f"✅ Successfully fetched {len(models)} OLLAMA models")
+                else:
+                    print("⚠️ No OLLAMA models returned")
         return success
 
     def test_vectorize_repository(self):
