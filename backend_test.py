@@ -241,6 +241,10 @@ def main():
     # Test configuration endpoints
     tester.test_get_config()
     
+    # Test OLLAMA model fetching specifically
+    print("\n🔍 Testing OLLAMA Model Fetching...")
+    tester.test_check_service_connection("ollama")
+    
     # Test updating configuration with test values
     test_config = {
         "ollama_url": "http://localhost:11434",
@@ -260,11 +264,15 @@ def main():
     }
     tester.test_update_config(test_config)
     
+    # Test OLLAMA model fetching after URL update
+    print("\n🔍 Testing OLLAMA Model Fetching after URL update...")
+    tester.test_check_service_connection("ollama")
+    
     # Test connection status endpoints
     tester.test_check_all_connections()
     
     # Test individual service connections
-    for service in ["ollama", "gitlab", "jira", "postgres"]:
+    for service in ["gitlab", "jira", "postgres"]:
         tester.test_check_service_connection(service)
     
     # Test vectorization endpoints
