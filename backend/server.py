@@ -997,19 +997,48 @@ async def get_analytics():
         usage_result = await db.advanced_code_suggestions.aggregate(pipeline).to_list(30)
         usage_by_day = {item["_id"]: item["count"] for item in usage_result}
         
+        # Count successful suggestions (those with confidence > 0.5)
+        successful_suggestions = await db.advanced_code_suggestions.count_documents({
+            "confidence_score": {"$gt": 0.5}
+        })
+        
+        # Count merge requests by checking if we have any merge request records
+        # Since we don't have a separate MR collection, we'll use 0 for now
+        total_merge_requests = 0
+        successful_merge_requests = 0
+        
+        # Get actual ticket types from suggestions if ticket_summary exists
+        pipeline = [
+            {"$match": {"ticket_summary": {"$exists": True, "$ne": None}}},
+            {"$group": {
+                "_id": {"$cond": [
+                    {"$regexMatch": {"input": "$ticket_summary", "regex": "bug|fix|error", "options": "i"}}, 
+                    "Bug Fix",
+                    {"$cond": [
+                        {"$regexMatch": {"input": "$ticket_summary", "regex": "feature|new|add", "options": "i"}}, 
+                        "Feature",
+                        "Enhancement"
+                    ]}
+                ]},
+                "count": {"$sum": 1}
+            }}
+        ]
+        ticket_types_result = await db.advanced_code_suggestions.aggregate(pipeline).to_list(10)
+        top_ticket_types = [{"type": item["_id"], "count": item["count"]} for item in ticket_types_result]
+        
+        # If no ticket summaries exist, return empty array instead of mock data
+        if not top_ticket_types:
+            top_ticket_types = []
+        
         return AnalyticsData(
             total_suggestions=total_suggestions,
-            successful_suggestions=int(total_suggestions * 0.85),  # Mock 85% success rate
+            successful_suggestions=successful_suggestions,
             avg_confidence=avg_confidence * 100 if avg_confidence else 0,
             avg_processing_time=avg_processing_time / 1000 if avg_processing_time else 0,  # Convert to seconds
-            total_merge_requests=int(total_suggestions * 0.6),  # Mock 60% MR creation rate
-            successful_merge_requests=int(total_suggestions * 0.45),  # Mock 45% successful MRs
+            total_merge_requests=total_merge_requests,
+            successful_merge_requests=successful_merge_requests,
             usage_by_day=usage_by_day,
-            top_ticket_types=[
-                {"type": "Bug Fix", "count": int(total_suggestions * 0.4)},
-                {"type": "Feature", "count": int(total_suggestions * 0.35)},
-                {"type": "Enhancement", "count": int(total_suggestions * 0.25)}
-            ]
+            top_ticket_types=top_ticket_types
         )
         
     except Exception as e:
