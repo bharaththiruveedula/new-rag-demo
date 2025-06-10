@@ -901,8 +901,8 @@ ${lines.map(line => '+' + line).join('\n')}`;
 
       {/* Clean Footer */}
       <footer className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-8 py-12">
-          <div className="text-center space-y-4">
+        <div className="responsive-container py-8 lg:py-12">
+          <div className="text-center content-section">
             <div className="flex items-center justify-center space-x-3">
               <div className="w-6 h-6 bg-red-600"></div>
               <span className="text-xl font-medium">RAG Assistant</span>
