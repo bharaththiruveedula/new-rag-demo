@@ -119,6 +119,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Verified that the analytics endpoint returns real data from MongoDB. Confirmed that avg_confidence is converted to percentage (multiplied by 100) and avg_processing_time is converted from milliseconds to seconds. Created a dedicated test script (analytics_test.py) that verifies all requirements. Tests confirmed that analytics data updates correctly after creating new suggestions."
+      - working: true
+        agent: "testing"
+        comment: "Performed additional verification of the analytics endpoint to ensure all dummy/mock values have been removed. Created two dedicated test scripts (analytics_test.py and analytics_verification.py) that verify the endpoint returns real data. Confirmed that total_suggestions is the actual count from the database (10), successful_suggestions is the real count of suggestions with confidence > 0.5 (10), avg_confidence is the real average (70.0%), avg_processing_time is in seconds (0.538s), total_merge_requests is 0, successful_merge_requests is 0, top_ticket_types contains real data based on ticket summaries, and usage_by_day contains real usage data. No mock calculations were detected - specifically verified that the endpoint is not using 85% success rate, 60% MR creation rate, or 45% successful MR calculations."
 
 frontend:
   - task: "Load real analytics data instead of dummy values"
