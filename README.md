@@ -662,96 +662,359 @@ tail -f /var/log/supervisor/frontend.*.log
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-#### 1. Services Not Connecting
+#### 1. Service Connection Issues
+
+**MongoDB Connection Failed:**
+```bash
+# Check if MongoDB is running
+sudo systemctl status mongod
+
+# Start MongoDB if not running
+sudo systemctl start mongod
+
+# Check MongoDB logs
+sudo tail -f /var/log/mongodb/mongod.log
+
+# Test connection manually
+mongosh --eval "db.runCommand('ping')"
+
+# Common fixes:
+# - Ensure MongoDB is installed and started
+# - Check if port 27017 is available: sudo netstat -tlnp | grep 27017
+# - Verify disk space: df -h
+```
 
 **OLLAMA Connection Failed:**
 ```bash
 # Check if OLLAMA is running
+ps aux | grep ollama
+
+# Start OLLAMA manually
+ollama serve
+
+# Check OLLAMA API
 curl http://localhost:11434/api/tags
 
-# Restart OLLAMA
-ollama serve
+# Pull missing models
+ollama pull codellama
 
 # Check available models
 ollama list
+
+# Common fixes:
+# - Ensure OLLAMA is installed: which ollama
+# - Check port 11434 is available: sudo netstat -tlnp | grep 11434
+# - Try restarting: pkill ollama && ollama serve
+```
+
+**PostgreSQL Connection Failed:**
+```bash
+# Check if PostgreSQL is running
+sudo systemctl status postgresql
+
+# Start PostgreSQL if needed
+sudo systemctl start postgresql
+
+# Test connection
+psql -h localhost -U rag_user -d vector_db -c "SELECT 1;"
+
+# Check pgvector extension
+sudo -u postgres psql vector_db -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
+
+# Common fixes:
+# - Ensure PostgreSQL is installed and running
+# - Verify user permissions: sudo -u postgres psql -c "\du"
+# - Check database exists: sudo -u postgres psql -l
+# - Install pgvector if missing: sudo apt install postgresql-14-pgvector
 ```
 
 **GitLab/JIRA Authentication:**
 ```bash
 # Test GitLab token
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://gitlab.com/api/v4/user
+  https://your-gitlab-instance.com/api/v4/user
 
 # Test JIRA token
 curl -u username:token \
   https://your-jira.atlassian.net/rest/api/2/myself
+
+# Common fixes:
+# - Verify token is correct and not expired
+# - Check API scope permissions
+# - Ensure URLs are correct (include https://)
+# - Test network connectivity to services
 ```
 
 #### 2. Frontend Issues
 
 **Application Not Loading:**
 ```bash
-# Check frontend status
-sudo supervisorctl status frontend
+# Check frontend process
+ps aux | grep "yarn start"
 
-# Check logs
-tail -f /var/log/supervisor/frontend.*.log
+# Check if port 3000 is in use
+sudo netstat -tlnp | grep 3000
 
-# Restart if needed
-sudo supervisorctl restart frontend
+# Restart frontend
+cd frontend
+yarn start
+
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+yarn install
+yarn start
+
+# Check browser console for errors (F12)
 ```
 
 **API Connection Issues:**
-- Verify `REACT_APP_BACKEND_URL` in `/app/frontend/.env`
-- Check backend is running on correct port
-- Verify CORS settings
+```bash
+# Verify backend URL in frontend/.env
+cat frontend/.env
+
+# Test backend API directly
+curl http://localhost:8001/api/config
+
+# Check CORS settings
+# Backend should allow frontend origin in CORS_ORIGINS
+
+# Common fixes:
+# - Ensure REACT_APP_BACKEND_URL is correct
+# - Check backend is running on port 8001
+# - Verify no firewall blocking requests
+# - Clear browser cache and cookies
+```
 
 #### 3. Backend Issues
 
 **Dependencies Missing:**
 ```bash
+# Activate virtual environment
+source venv/bin/activate
+
 # Reinstall requirements
 cd backend
 pip install -r requirements.txt --upgrade
 
-# Restart backend
-sudo supervisorctl restart backend
+# Check for conflicting packages
+pip check
+
+# Common fixes:
+# - Use virtual environment: python3 -m venv venv
+# - Update pip: pip install --upgrade pip
+# - Install system dependencies: sudo apt install python3-dev libpq-dev
+```
+
+**Import or Module Errors:**
+```bash
+# Check Python path
+cd backend
+python -c "import sys; print(sys.path)"
+
+# Test imports manually
+python -c "from server import app; print('Backend imports OK')"
+
+# Check for missing system packages
+sudo apt install build-essential python3-dev libpq-dev
+
+# Virtual environment activation
+source ../venv/bin/activate  # From backend directory
 ```
 
 **Database Connection:**
 ```bash
-# Check MongoDB
-sudo systemctl status mongod
+# Test MongoDB connection from Python
+python -c "from motor.motor_asyncio import AsyncIOMotorClient; print('MongoDB client OK')"
 
-# Test connection
-mongo --eval "db.runCommand('ping')"
+# Test PostgreSQL connection
+python -c "import psycopg2; conn=psycopg2.connect('host=localhost user=rag_user dbname=vector_db password=secure_password'); print('PostgreSQL OK')"
+
+# Check environment variables
+cd backend && python -c "import os; print(os.environ.get('MONGO_URL'))"
 ```
 
 #### 4. Performance Issues
 
 **Slow Code Generation:**
-- Use smaller OLLAMA models for faster responses
-- Reduce chunk size in configuration
-- Check available memory and CPU
+```bash
+# Check system resources
+htop  # or top
+
+# Check OLLAMA model size
+ollama list
+
+# Use smaller models for faster responses
+ollama pull codellama:7b  # Instead of larger models
+
+# Monitor OLLAMA performance
+curl http://localhost:11434/api/ps
+
+# Common fixes:
+# - Use smaller models (codellama vs codellama:34b)
+# - Increase system RAM
+# - Close other applications
+# - Reduce chunk_size in configuration
+```
 
 **High Memory Usage:**
-- Monitor model loading
-- Restart services periodically
-- Consider using smaller embedding models
-
-### Log Locations
-
 ```bash
-# Application logs
-/var/log/supervisor/backend.*.log
-/var/log/supervisor/frontend.*.log
+# Monitor memory usage
+free -h
+ps aux --sort=-%mem | head -10
 
-# System logs
-/var/log/mongodb/mongod.log
-journalctl -u ollama
+# Check OLLAMA memory usage
+ps aux | grep ollama
+
+# Restart services to free memory
+pm2 restart all  # If using PM2
+# Or restart manually
+
+# Common fixes:
+# - Restart OLLAMA periodically
+# - Use smaller embedding models
+# - Limit concurrent requests
+# - Increase swap space
 ```
+
+#### 5. Development Issues
+
+**Hot Reload Not Working:**
+```bash
+# Backend hot reload
+cd backend
+uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+
+# Frontend hot reload
+cd frontend
+yarn start
+
+# Common fixes:
+# - Ensure --reload flag for uvicorn
+# - Check file watchers: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+# - Restart development servers
+# - Check file permissions
+```
+
+**Port Conflicts:**
+```bash
+# Check what's using ports
+sudo netstat -tlnp | grep :3000
+sudo netstat -tlnp | grep :8001
+sudo netstat -tlnp | grep :11434
+sudo netstat -tlnp | grep :27017
+
+# Kill processes using ports
+sudo kill -9 $(sudo lsof -t -i:3000)
+sudo kill -9 $(sudo lsof -t -i:8001)
+
+# Use different ports if needed
+# Frontend: yarn start --port 3001
+# Backend: uvicorn server:app --port 8002
+```
+
+### Log Locations and Debugging
+
+#### Application Logs:
+```bash
+# Backend logs (if running manually)
+cd backend
+uvicorn server:app --host 0.0.0.0 --port 8001 --reload --log-level debug
+
+# Frontend logs (browser console)
+# Open browser Developer Tools (F12) -> Console tab
+
+# MongoDB logs
+sudo tail -f /var/log/mongodb/mongod.log
+
+# PostgreSQL logs
+sudo tail -f /var/log/postgresql/postgresql-14-main.log
+
+# OLLAMA logs
+# Check terminal where ollama serve is running
+```
+
+#### Enable Debug Mode:
+```bash
+# Backend debug mode
+# Edit backend/.env:
+DEBUG=True
+LOG_LEVEL=DEBUG
+
+# Frontend debug mode
+# Edit frontend/.env:
+REACT_APP_DEBUG=true
+
+# Restart services after changes
+```
+
+#### System Resource Monitoring:
+```bash
+# Monitor system resources
+htop
+iotop  # Disk I/O
+nethogs  # Network usage
+
+# Monitor specific processes
+watch -n 1 'ps aux | grep -E "(python|node|ollama|mongod)"'
+
+# Check disk space
+df -h
+du -sh rag-assistant/
+
+# Check memory usage
+free -h
+cat /proc/meminfo
+```
+
+### Getting Help
+
+#### Self-Diagnosis Checklist:
+1. ✅ All services (MongoDB, PostgreSQL, OLLAMA) are running
+2. ✅ Virtual environment is activated for Python
+3. ✅ Environment files (.env) are correctly configured
+4. ✅ Required ports (3000, 8001, 11434, 27017, 5432) are available
+5. ✅ External service credentials (GitLab, JIRA) are valid
+6. ✅ System has sufficient memory (4GB+ recommended)
+7. ✅ Internet connection for downloading models and accessing APIs
+
+#### Quick Health Check Script:
+```bash
+#!/bin/bash
+# Save as health-check.sh and run: bash health-check.sh
+
+echo "=== RAG Assistant Health Check ==="
+
+echo "Checking MongoDB..."
+mongosh --eval "db.runCommand('ping')" >/dev/null 2>&1 && echo "✅ MongoDB OK" || echo "❌ MongoDB Failed"
+
+echo "Checking PostgreSQL..."
+psql -h localhost -U rag_user -d vector_db -c "SELECT 1;" >/dev/null 2>&1 && echo "✅ PostgreSQL OK" || echo "❌ PostgreSQL Failed"
+
+echo "Checking OLLAMA..."
+curl -s http://localhost:11434/api/tags >/dev/null 2>&1 && echo "✅ OLLAMA OK" || echo "❌ OLLAMA Failed"
+
+echo "Checking Backend..."
+curl -s http://localhost:8001/api/config >/dev/null 2>&1 && echo "✅ Backend OK" || echo "❌ Backend Failed"
+
+echo "Checking Frontend..."
+curl -s http://localhost:3000 >/dev/null 2>&1 && echo "✅ Frontend OK" || echo "❌ Frontend Failed"
+
+echo "=== Health Check Complete ==="
+```
+
+#### When to Seek Help:
+- Error messages you can't resolve with this guide
+- Performance issues persisting after optimization
+- Integration problems with external services
+- Custom deployment scenarios
+
+#### Support Channels:
+1. **Documentation**: Review this README first
+2. **GitHub Issues**: Create detailed issue with logs
+3. **Community**: Stack Overflow with "rag-assistant" tag
+4. **Enterprise**: Professional support available
 
 ## 📊 Monitoring & Analytics
 
