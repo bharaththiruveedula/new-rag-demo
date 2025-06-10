@@ -17,6 +17,39 @@
 }
 
 @layer components {
+  /* Responsive Container System */
+  .responsive-container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: min(1400px, 90vw);
+  }
+  
+  .responsive-container-wide {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12;
+    max-width: min(1600px, 95vw);
+  }
+  
+  /* Responsive Grid Systems */
+  .responsive-grid-2 {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 xl:gap-12;
+  }
+  
+  .responsive-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8;
+  }
+  
+  .responsive-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8;
+  }
+  
+  /* Responsive Content Areas */
+  .content-area {
+    @apply space-y-8 lg:space-y-12 xl:space-y-16;
+  }
+  
+  .content-section {
+    @apply space-y-6 lg:space-y-8;
+  }
+  
   /* Clean Form Elements */
   .form-input {
     @apply w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 placeholder-gray-500;
@@ -30,13 +63,13 @@
   
   /* Button Styles */
   .btn-primary {
-    @apply px-8 py-3 bg-black text-white font-medium;
+    @apply px-6 py-3 lg:px-8 lg:py-3 bg-black text-white font-medium;
     @apply hover:bg-gray-800 transition-colors;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black;
   }
   
   .btn-secondary {
-    @apply px-6 py-2 border border-gray-300 text-gray-700 font-medium bg-white;
+    @apply px-4 py-2 lg:px-6 lg:py-2 border border-gray-300 text-gray-700 font-medium bg-white;
     @apply hover:bg-gray-50 transition-colors;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300;
   }
@@ -48,6 +81,11 @@
   
   .card-hover {
     @apply transition-all duration-200 hover:shadow-sm;
+  }
+  
+  /* Responsive Card Padding */
+  .card-padding {
+    @apply p-6 lg:p-8 xl:p-10;
   }
   
   /* Status Indicators */
