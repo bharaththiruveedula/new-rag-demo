@@ -250,26 +250,26 @@ ${lines.map(line => '+' + line).join('\n')}`;
 
   // Dashboard Tab (combines status and analytics)
   const DashboardTab = () => (
-    <div className="space-y-12">
+    <div className="content-section">
       {/* Hero Section - Clean and Minimal */}
-      <div className="text-center space-y-6">
-        <h1 className="text-5xl font-light text-gray-900 tracking-tight">
+      <div className="text-center content-section">
+        <h1 className="text-3xl lg:text-5xl font-light text-gray-900 tracking-tight">
           RAG Assistant
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Intelligent code analysis and suggestions powered by advanced AI technology
         </p>
       </div>
 
-      {/* System Status - Swiss Grid Layout */}
-      <div className="space-y-8">
-        <h2 className="text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
+      {/* System Status - Responsive Grid Layout */}
+      <div className="content-section">
+        <h2 className="text-2xl lg:text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
           System Status
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="responsive-grid-4">
           {connectionStatuses.map((status) => (
-            <div key={status.service} className="bg-white border border-gray-200 p-8 space-y-4">
+            <div key={status.service} className="card card-padding content-section">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900 capitalize">
                   {status.service}
@@ -300,7 +300,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <button
             onClick={checkAllConnections}
             disabled={isLoading}
-            className="px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {isLoading ? 'Checking...' : 'Refresh Status'}
           </button>
@@ -308,20 +308,20 @@ ${lines.map(line => '+' + line).join('\n')}`;
       </div>
 
       {/* Analytics Section */}
-      <div className="space-y-8">
-        <h2 className="text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
+      <div className="content-section">
+        <h2 className="text-2xl lg:text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
           Analytics
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="responsive-grid-4">
           {[
             { title: 'Total Suggestions', value: analytics.totalSuggestions, unit: '' },
             { title: 'Avg Confidence', value: analytics.avgConfidence, unit: '%' },
             { title: 'Successful MRs', value: analytics.successfulMRs, unit: '' },
             { title: 'Processing Time', value: analytics.processingTime, unit: 's' },
           ].map((metric, index) => (
-            <div key={index} className="bg-white border border-gray-200 p-8 text-center space-y-4">
-              <div className="text-4xl font-light text-gray-900">
+            <div key={index} className="card card-padding text-center content-section">
+              <div className="text-3xl lg:text-4xl font-light text-gray-900">
                 {metric.value}{metric.unit}
               </div>
               <div className="text-sm text-gray-600 font-medium">
