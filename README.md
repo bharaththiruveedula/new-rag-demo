@@ -31,24 +31,167 @@ RAG Assistant is an enterprise-grade application that combines Retrieval-Augment
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Direct Laptop Installation)
 
 ### Prerequisites
 
-- **Node.js** 18+ and **yarn**
+Before installing RAG Assistant on your laptop, ensure you have:
+
+- **Node.js** 18+ and **yarn** package manager
 - **Python** 3.9+ and **pip**
-- **MongoDB** for configuration storage
+- **Git** for repository cloning
+- **MongoDB** Community Edition (local installation)
 - **OLLAMA** for AI model inference
-- **PostgreSQL** with pgvector extension (optional)
+- **PostgreSQL** 14+ with pgvector extension
+- **4GB+ RAM** (8GB+ recommended for optimal performance)
 - **GitLab** instance with API access
 - **JIRA** instance with API access
 
-### 1. Installation
+### 1. System Dependencies Installation
 
+#### On Ubuntu/Debian:
+```bash
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 18+ and yarn
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install -g yarn
+
+# Install Python 3.9+ and pip
+sudo apt install python3 python3-pip python3-venv -y
+
+# Install Git
+sudo apt install git -y
+
+# Install MongoDB Community Edition
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt update
+sudo apt install -y mongodb-org
+
+# Install PostgreSQL with pgvector
+sudo apt install postgresql postgresql-contrib postgresql-client -y
+sudo apt install postgresql-14-pgvector -y
+
+# Install build essentials for Python packages
+sudo apt install build-essential python3-dev libpq-dev -y
+```
+
+#### On macOS:
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Node.js and yarn
+brew install node yarn
+
+# Install Python 3.9+
+brew install python@3.9
+
+# Install Git
+brew install git
+
+# Install MongoDB Community Edition
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Install PostgreSQL with pgvector
+brew install postgresql
+brew install pgvector
+```
+
+#### On Windows:
+```powershell
+# Install using Chocolatey (install Chocolatey first if needed)
+# Install Chocolatey: https://chocolatey.org/install
+
+# Install Node.js and yarn
+choco install nodejs yarn -y
+
+# Install Python 3.9+
+choco install python39 -y
+
+# Install Git
+choco install git -y
+
+# Install MongoDB Community Edition
+choco install mongodb -y
+
+# Install PostgreSQL
+choco install postgresql -y
+# Note: pgvector needs manual installation on Windows
+```
+
+### 2. Service Setup and Configuration
+
+#### MongoDB Setup:
+```bash
+# Start MongoDB service
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+# Verify MongoDB is running
+mongosh --eval "db.runCommand('ping')"
+
+# Create database and user (optional but recommended)
+mongosh
+> use rag_assistant
+> db.createUser({
+    user: "rag_user",
+    pwd: "secure_password",
+    roles: ["readWrite"]
+  })
+> exit
+```
+
+#### PostgreSQL Setup:
+```bash
+# Start PostgreSQL service
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Create database and enable pgvector
+sudo -u postgres createdb vector_db
+sudo -u postgres psql vector_db -c "CREATE EXTENSION vector;"
+
+# Create user and grant permissions
+sudo -u postgres psql -c "CREATE USER rag_user WITH PASSWORD 'secure_password';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE vector_db TO rag_user;"
+
+# Test connection
+psql -h localhost -U rag_user -d vector_db -c "SELECT 1;"
+```
+
+#### OLLAMA Setup:
+```bash
+# Install OLLAMA
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start OLLAMA service (runs automatically on port 11434)
+ollama serve &
+
+# Pull recommended models for code generation
+ollama pull codellama
+ollama pull codellama:13b
+ollama pull deepseek-coder
+
+# Verify OLLAMA is working
+curl http://localhost:11434/api/tags
+```
+
+### 3. Application Installation
+
+#### Clone and Setup:
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd rag-assistant
+
+# Create Python virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install backend dependencies
 cd backend
@@ -62,86 +205,216 @@ yarn install
 cd ..
 ```
 
-### 2. Environment Setup
+### 4. Environment Configuration
 
-#### Backend Configuration
-
-Create `/app/backend/.env`:
-
+#### Backend Environment (`/app/backend/.env`):
 ```env
 # Database Configuration
 MONGO_URL=mongodb://localhost:27017
 DB_NAME=rag_assistant
 
-# Optional: Production settings
+# If using MongoDB authentication
+# MONGO_URL=mongodb://rag_user:secure_password@localhost:27017/rag_assistant
+
+# PostgreSQL Configuration (used by application)
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=vector_db
+POSTGRES_USER=rag_user
+POSTGRES_PASSWORD=secure_password
+
+# Application Settings
 ENVIRONMENT=development
 LOG_LEVEL=INFO
+DEBUG=True
+
+# Security (change in production)
+SECRET_KEY=your-secret-key-here
+CORS_ORIGINS=["http://localhost:3000"]
 ```
 
-#### Frontend Configuration
-
-Create `/app/frontend/.env`:
-
+#### Frontend Environment (`/app/frontend/.env`):
 ```env
-# Backend API URL (configured for production)
-REACT_APP_BACKEND_URL=<your-backend-url>
+# Backend API URL for local development
+REACT_APP_BACKEND_URL=http://localhost:8001
+
+# Development settings
+REACT_APP_DEBUG=true
+REACT_APP_LOG_LEVEL=debug
+
+# Optional: API timeout settings
+REACT_APP_API_TIMEOUT=30000
 ```
 
-### 3. Start Services
+### 5. Start Services
 
-#### Option A: Development Mode
+#### Option A: Manual Startup (Recommended for Development)
 
+**Terminal 1 - Backend:**
 ```bash
-# Terminal 1: Start Backend
+cd rag-assistant
+source venv/bin/activate  # Activate virtual environment
 cd backend
 uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+```
 
-# Terminal 2: Start Frontend
-cd frontend
+**Terminal 2 - Frontend:**
+```bash
+cd rag-assistant/frontend
 yarn start
+# Frontend will start on http://localhost:3000
 ```
 
-#### Option B: Production Mode (Supervisor)
-
+**Terminal 3 - MongoDB (if not running as service):**
 ```bash
-# Start all services
-sudo supervisorctl restart all
-
-# Check status
-sudo supervisorctl status
+mongod --dbpath /usr/local/var/mongodb
 ```
 
-### 4. Initial Configuration
-
-1. **Open the application** at `http://localhost:3000`
-2. **Navigate to Configuration tab**
-3. **Configure external services:**
-
-#### OLLAMA Setup
+**Terminal 4 - OLLAMA (if not running as service):**
 ```bash
-# Install OLLAMA
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Pull a code model
-ollama pull codellama
-
-# Start OLLAMA (runs on http://localhost:11434 by default)
 ollama serve
 ```
 
-#### PostgreSQL with pgvector
+#### Option B: Using Process Manager (PM2)
+
 ```bash
-# Install PostgreSQL
-sudo apt install postgresql postgresql-contrib
+# Install PM2 globally
+npm install -g pm2
 
-# Install pgvector extension
-sudo apt install postgresql-14-pgvector
+# Create PM2 ecosystem file
+cat > ecosystem.config.js << EOF
+module.exports = {
+  apps: [
+    {
+      name: 'rag-backend',
+      cwd: './backend',
+      script: 'uvicorn',
+      args: 'server:app --host 0.0.0.0 --port 8001',
+      interpreter: '../venv/bin/python',
+      env: {
+        'PYTHONPATH': '.'
+      }
+    },
+    {
+      name: 'rag-frontend',
+      cwd: './frontend',
+      script: 'yarn',
+      args: 'start',
+      env: {
+        'PORT': 3000
+      }
+    }
+  ]
+};
+EOF
 
-# Create database
-sudo -u postgres createdb vector_db
+# Start all services
+pm2 start ecosystem.config.js
 
-# Enable extension
-sudo -u postgres psql vector_db -c "CREATE EXTENSION vector;"
+# Monitor services
+pm2 monit
+
+# Stop services
+pm2 stop all
+```
+
+### 6. Service Verification
+
+#### Check All Services:
+```bash
+# Test MongoDB
+mongosh --eval "db.runCommand('ping')"
+
+# Test PostgreSQL
+psql -h localhost -U rag_user -d vector_db -c "SELECT 1;"
+
+# Test OLLAMA
+curl http://localhost:11434/api/tags
+
+# Test Backend API
+curl http://localhost:8001/api/config
+
+# Test Frontend (open browser)
+open http://localhost:3000  # macOS
+# or visit http://localhost:3000 in your browser
+```
+
+### 7. Initial Application Configuration
+
+1. **Open RAG Assistant** in browser: `http://localhost:3000`
+
+2. **Navigate to Configuration tab**
+
+3. **Configure Services:**
+
+   **OLLAMA Configuration:**
+   - URL: `http://localhost:11434`
+   - Model: `codellama` (or any model you've pulled)
+   - Click refresh to load available models
+
+   **GitLab Configuration:**
+   - URL: `https://your-gitlab-instance.com`
+   - Access Token: `glpat-xxxxxxxxxxxxxxxxxxxx`
+   - Target Repository: `group/your-ansible-repo`
+
+   **JIRA Configuration:**
+   - URL: `https://your-company.atlassian.net`
+   - Username: `your-email@company.com`
+   - API Token: `your-jira-api-token`
+
+   **PostgreSQL Configuration:**
+   - Host: `localhost`
+   - Port: `5432`
+   - Database: `vector_db`
+   - Username: `rag_user`
+   - Password: `secure_password`
+
+4. **Save Configuration** and verify all services show "Connected" status
+
+5. **Test Code Suggestion:**
+   - Go to "Code Suggestions" tab
+   - Enter a JIRA ticket ID
+   - Click "Generate Code"
+   - Review the AI-generated suggestions
+
+### 8. Development Workflow
+
+#### Daily Development:
+```bash
+# 1. Start services
+cd rag-assistant
+source venv/bin/activate
+cd backend && uvicorn server:app --host 0.0.0.0 --port 8001 --reload &
+cd ../frontend && yarn start &
+
+# 2. Make code changes
+# Edit files in backend/ or frontend/src/
+
+# 3. Test changes
+# Backend changes reload automatically with --reload flag
+# Frontend changes reload automatically with yarn start
+
+# 4. Stop services when done
+# Ctrl+C in each terminal or:
+pkill -f uvicorn
+pkill -f "yarn start"
+```
+
+#### Database Management:
+```bash
+# View MongoDB data
+mongosh rag_assistant
+> db.service_config.find().pretty()
+> db.code_suggestions.find().limit(5).pretty()
+
+# View PostgreSQL data
+psql -h localhost -U rag_user -d vector_db
+\dt  -- List tables
+SELECT * FROM code_chunks LIMIT 5;
+
+# Backup databases
+mongodump --db rag_assistant --out ./backup/
+pg_dump -h localhost -U rag_user vector_db > ./backup/vector_db.sql
 ```
 
 ## 📋 Detailed Configuration
