@@ -1,30 +1,14 @@
-#!/usr/bin/env python3
-"""
-Analytics Endpoint Test Script
-
-This script specifically tests the /api/analytics endpoint to verify:
-1. It returns real data instead of dummy values
-2. The JSON structure has the required fields
-3. The avg_confidence is converted to percentage (multiplied by 100)
-4. The avg_processing_time is converted from milliseconds to seconds
-5. Error handling works correctly
-6. Data accuracy for a fresh database
-7. Data updates after creating a suggestion
-"""
 
 import requests
 import json
 import time
 from datetime import datetime
-import os
-
-# Get backend URL from environment variable
-BACKEND_URL = os.environ.get('BACKEND_URL', 'https://c624a4bd-9719-44d8-8b44-e52e7972801c.preview.emergentagent.com')
+import random
 
 class AnalyticsEndpointTester:
-    def __init__(self, base_url=BACKEND_URL):
+    def __init__(self, base_url="https://c624a4bd-9719-44d8-8b44-e52e7972801c.preview.emergentagent.com"):
         self.base_url = base_url
-        self.api_url = f"{base_url}/api"
+        self.api_url = f"{self.base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
@@ -82,22 +66,43 @@ class AnalyticsEndpointTester:
             print(f"❌ Error - {str(e)}")
             return False, None
 
-    def test_analytics_structure(self):
-        """Test the structure of the analytics endpoint response"""
+    def get_analytics(self):
+        """Get analytics data from the API"""
         success, response = self.run_test(
-            "Analytics Endpoint Structure",
+            "Get Analytics Data",
             "GET",
             "analytics",
             200
         )
+        if success:
+            return response.json()
+        return None
+
+    def create_test_suggestion(self, confidence_score=0.7):
+        """Create a test suggestion with specified confidence score"""
+        test_ticket_id = f"TEST-{int(time.time())}-{random.randint(1000, 9999)}"
+        
+        # First, we need to create a suggestion
+        success, response = self.run_test(
+            f"Create Test Suggestion (confidence: {confidence_score})",
+            "POST",
+            "suggest/code",
+            200,
+            data={"ticket_id": test_ticket_id}
+        )
         
         if not success:
-            return False
+            print("❌ Failed to create test suggestion")
+            return None
             
-        analytics = response.json()
-        print(f"Analytics Response: {json.dumps(analytics, indent=2)}")
+        # The API doesn't allow setting confidence directly, so we'll just return the created suggestion
+        return response.json()
+
+    def verify_analytics_data_types(self, analytics):
+        """Verify that analytics data has the correct types"""
+        print("\n🔍 Verifying analytics data types...")
         
-        # Verify the JSON structure has all required fields
+        # Check required fields
         required_fields = [
             'total_suggestions', 'successful_suggestions', 'avg_confidence', 
             'avg_processing_time', 'total_merge_requests', 'successful_merge_requests',
@@ -108,10 +113,10 @@ class AnalyticsEndpointTester:
         if missing_fields:
             print(f"❌ Missing required fields in analytics response: {missing_fields}")
             return False
-        else:
-            print("✅ All required fields present in analytics response")
         
-        # Verify data types are correct
+        print("✅ All required fields present in analytics response")
+        
+        # Verify data types
         type_checks = [
             (analytics['total_suggestions'], int, 'total_suggestions'),
             (analytics['successful_suggestions'], int, 'successful_suggestions'),
@@ -123,184 +128,179 @@ class AnalyticsEndpointTester:
             (analytics['top_ticket_types'], list, 'top_ticket_types')
         ]
         
-        type_errors = []
+        all_types_correct = True
         for value, expected_type, field_name in type_checks:
             if not isinstance(value, expected_type):
-                type_errors.append(f"{field_name} should be {expected_type.__name__}, got {type(value).__name__}")
+                print(f"❌ {field_name} should be {expected_type.__name__}, got {type(value).__name__}")
+                all_types_correct = False
         
-        if type_errors:
-            print("❌ Type errors in analytics response:")
-            for error in type_errors:
-                print(f"  - {error}")
-            return False
-        else:
+        if all_types_correct:
             print("✅ All data types are correct in analytics response")
-            
-        return True
+            return True
+        return False
 
-    def test_analytics_data_accuracy(self):
-        """Test the accuracy of analytics data for a fresh database"""
-        success, response = self.run_test(
-            "Analytics Data Accuracy",
-            "GET",
-            "analytics",
-            200
-        )
+    def verify_no_mock_calculations(self, analytics, total_suggestions):
+        """Verify that no mock calculations are used"""
+        print("\n🔍 Verifying no mock calculations are used...")
         
-        if not success:
+        # Check if successful_suggestions is NOT calculated as 85% of total
+        mock_successful = round(total_suggestions * 0.85)
+        if analytics['successful_suggestions'] == mock_successful and total_suggestions > 0:
+            print(f"❌ successful_suggestions appears to be using mock 85% calculation: {analytics['successful_suggestions']} = {total_suggestions} * 0.85")
+            return False
+        
+        # Check if total_merge_requests is NOT calculated as 60% of total
+        mock_total_mr = round(total_suggestions * 0.6)
+        if analytics['total_merge_requests'] == mock_total_mr and total_suggestions > 0:
+            print(f"❌ total_merge_requests appears to be using mock 60% calculation: {analytics['total_merge_requests']} = {total_suggestions} * 0.6")
+            return False
+        
+        # Check if successful_merge_requests is NOT calculated as 45% of total
+        mock_successful_mr = round(total_suggestions * 0.45)
+        if analytics['successful_merge_requests'] == mock_successful_mr and total_suggestions > 0:
+            print(f"❌ successful_merge_requests appears to be using mock 45% calculation: {analytics['successful_merge_requests']} = {total_suggestions} * 0.45")
+            return False
+        
+        # Verify merge requests are 0 (since they're not implemented)
+        if analytics['total_merge_requests'] != 0:
+            print(f"❌ total_merge_requests should be 0, got {analytics['total_merge_requests']}")
             return False
             
-        analytics = response.json()
+        if analytics['successful_merge_requests'] != 0:
+            print(f"❌ successful_merge_requests should be 0, got {analytics['successful_merge_requests']}")
+            return False
         
-        # For a fresh database, verify all metrics are 0 or empty
-        # Note: This test assumes a fresh database. If data exists, this check might fail.
-        if analytics['total_suggestions'] == 0:
-            print("✅ total_suggestions is 0 as expected for a fresh database")
-            
-            # If no suggestions, these values should also be 0
-            zero_fields = [
-                'successful_suggestions', 'avg_confidence', 'avg_processing_time',
-                'total_merge_requests', 'successful_merge_requests'
-            ]
-            
-            all_zeros = all(analytics[field] == 0 for field in zero_fields)
-            if all_zeros:
-                print("✅ All metrics are 0 as expected for a fresh database")
-            else:
-                print("❌ Some metrics are not 0 despite total_suggestions being 0:")
-                for field in zero_fields:
-                    if analytics[field] != 0:
-                        print(f"  - {field}: {analytics[field]}")
-            
-            if not analytics['usage_by_day']:
-                print("✅ usage_by_day is empty as expected for a fresh database")
-            else:
-                print(f"❌ usage_by_day is not empty: {analytics['usage_by_day']}")
-                
-            if not analytics['top_ticket_types'] or all(item['count'] == 0 for item in analytics['top_ticket_types']):
-                print("✅ top_ticket_types are empty or have zero counts as expected")
-            else:
-                print(f"❌ top_ticket_types have non-zero counts: {analytics['top_ticket_types']}")
-        else:
-            print(f"ℹ️ Database is not fresh, contains {analytics['total_suggestions']} suggestions")
-            
+        print("✅ No mock calculations detected")
         return True
 
-    def test_analytics_unit_conversion(self):
-        """Test that analytics values are properly converted (confidence to %, time to seconds)"""
-        # First create a suggestion to ensure we have data
-        test_ticket_id = f"TEST-{int(time.time())}"  # Use timestamp to ensure unique ticket ID
-        success, _ = self.run_test(
-            "Create Test Suggestion",
-            "POST",
-            "suggest/code",
-            200,
-            data={"ticket_id": test_ticket_id}
-        )
+    def verify_analytics_values(self, analytics, expected_total, expected_successful):
+        """Verify that analytics values are calculated correctly"""
+        print("\n🔍 Verifying analytics values...")
         
-        if not success:
-            print("❌ Failed to create test suggestion")
+        # Check total_suggestions
+        if analytics['total_suggestions'] != expected_total:
+            print(f"❌ total_suggestions should be {expected_total}, got {analytics['total_suggestions']}")
             return False
-            
-        # Wait a moment for database to update
-        time.sleep(1)
         
-        # Get analytics
-        success, response = self.run_test(
-            "Analytics Unit Conversion",
-            "GET",
-            "analytics",
-            200
-        )
+        print(f"✅ total_suggestions is correct: {analytics['total_suggestions']}")
         
-        if not success:
+        # Check successful_suggestions
+        if analytics['successful_suggestions'] != expected_successful:
+            print(f"❌ successful_suggestions should be {expected_successful}, got {analytics['successful_suggestions']}")
             return False
-            
-        analytics = response.json()
         
-        # Verify that avg_confidence is in percentage (0-100 range)
-        if analytics['avg_confidence'] > 0:
-            if 0 <= analytics['avg_confidence'] <= 100:
-                print("✅ avg_confidence is in percentage range (0-100)")
-            else:
-                print(f"❌ avg_confidence is not in percentage range: {analytics['avg_confidence']}")
-                return False
+        print(f"✅ successful_suggestions is correct: {analytics['successful_suggestions']}")
         
-        # Verify that avg_processing_time is in seconds (not milliseconds)
-        if analytics['avg_processing_time'] > 0:
-            # Typical processing times should be under 60 seconds
-            if 0 <= analytics['avg_processing_time'] < 60:
-                print("✅ avg_processing_time appears to be in seconds")
-            else:
-                print(f"❌ avg_processing_time may not be in seconds: {analytics['avg_processing_time']}")
-                return False
-                
+        # Check avg_confidence is in percentage form (0-100)
+        if not (0 <= analytics['avg_confidence'] <= 100):
+            print(f"❌ avg_confidence should be in range 0-100, got {analytics['avg_confidence']}")
+            return False
+        
+        print(f"✅ avg_confidence is in correct range: {analytics['avg_confidence']}%")
+        
+        # Check avg_processing_time is in seconds (not milliseconds)
+        # Typical processing times should be under 60 seconds
+        if not (0 <= analytics['avg_processing_time'] < 60):
+            print(f"❌ avg_processing_time should be in seconds (0-60), got {analytics['avg_processing_time']}")
+            return False
+        
+        print(f"✅ avg_processing_time is in correct range: {analytics['avg_processing_time']}s")
+        
         return True
 
-    def test_analytics_after_suggestion(self):
-        """Test that analytics data updates after creating a suggestion"""
+    def run_analytics_tests(self):
+        """Run comprehensive tests on the analytics endpoint"""
+        print("\n" + "="*50)
+        print("🧪 ANALYTICS ENDPOINT TESTING")
+        print("="*50)
+        
         # Get initial analytics
-        success, initial_response = self.run_test(
-            "Get Initial Analytics",
-            "GET",
-            "analytics",
-            200
-        )
-        
-        if not success:
+        initial_analytics = self.get_analytics()
+        if not initial_analytics:
             print("❌ Failed to get initial analytics")
             return False
-            
-        initial_analytics = initial_response.json()
-        initial_count = initial_analytics['total_suggestions']
-        print(f"Initial total_suggestions: {initial_count}")
         
-        # Create a test suggestion
-        test_ticket_id = f"TEST-{int(time.time())}"  # Use timestamp to ensure unique ticket ID
-        success, suggestion_response = self.run_test(
-            "Create Test Suggestion",
-            "POST",
-            "suggest/code",
-            200,
-            data={"ticket_id": test_ticket_id}
-        )
+        print("\n📊 Initial Analytics Data:")
+        print(f"Total Suggestions: {initial_analytics['total_suggestions']}")
+        print(f"Successful Suggestions: {initial_analytics['successful_suggestions']}")
+        print(f"Avg Confidence: {initial_analytics['avg_confidence']}%")
+        print(f"Avg Processing Time: {initial_analytics['avg_processing_time']}s")
+        print(f"Total Merge Requests: {initial_analytics['total_merge_requests']}")
+        print(f"Successful Merge Requests: {initial_analytics['successful_merge_requests']}")
+        print(f"Usage by Day: {json.dumps(initial_analytics['usage_by_day'], indent=2)}")
+        print(f"Top Ticket Types: {json.dumps(initial_analytics['top_ticket_types'], indent=2)}")
         
-        if not success:
-            print("❌ Failed to create test suggestion")
+        # Verify data types
+        if not self.verify_analytics_data_types(initial_analytics):
             return False
-            
-        # Wait a moment for database to update
-        time.sleep(1)
+        
+        # Verify no mock calculations
+        if not self.verify_no_mock_calculations(initial_analytics, initial_analytics['total_suggestions']):
+            return False
+        
+        # Create test suggestions with different confidence scores
+        initial_total = initial_analytics['total_suggestions']
+        initial_successful = initial_analytics['successful_suggestions']
+        
+        # Create suggestions with confidence > 0.5 (should count as successful)
+        high_confidence_suggestions = []
+        for _ in range(2):
+            suggestion = self.create_test_suggestion(confidence_score=0.7)
+            if suggestion:
+                high_confidence_suggestions.append(suggestion)
+                print(f"Created suggestion with confidence: {suggestion['confidence_score']}")
+        
+        # Create suggestions with confidence <= 0.5 (should not count as successful)
+        low_confidence_suggestions = []
+        for _ in range(1):
+            suggestion = self.create_test_suggestion(confidence_score=0.3)
+            if suggestion:
+                low_confidence_suggestions.append(suggestion)
+                print(f"Created suggestion with confidence: {suggestion['confidence_score']}")
+        
+        # Wait for database to update
+        print("\nWaiting for database to update...")
+        time.sleep(2)
         
         # Get updated analytics
-        success, updated_response = self.run_test(
-            "Get Updated Analytics",
-            "GET",
-            "analytics",
-            200
-        )
-        
-        if not success:
+        updated_analytics = self.get_analytics()
+        if not updated_analytics:
             print("❌ Failed to get updated analytics")
             return False
-            
-        updated_analytics = updated_response.json()
-        updated_count = updated_analytics['total_suggestions']
-        print(f"Updated total_suggestions: {updated_count}")
         
-        # Verify that total_suggestions increased by 1
-        if updated_count == initial_count + 1:
-            print("✅ total_suggestions increased by 1 after creating a suggestion")
-        else:
-            print(f"❌ total_suggestions did not increase correctly. Expected {initial_count + 1}, got {updated_count}")
+        print("\n📊 Updated Analytics Data:")
+        print(f"Total Suggestions: {updated_analytics['total_suggestions']}")
+        print(f"Successful Suggestions: {updated_analytics['successful_suggestions']}")
+        print(f"Avg Confidence: {updated_analytics['avg_confidence']}%")
+        print(f"Avg Processing Time: {updated_analytics['avg_processing_time']}s")
+        print(f"Total Merge Requests: {updated_analytics['total_merge_requests']}")
+        print(f"Successful Merge Requests: {updated_analytics['successful_merge_requests']}")
+        
+        # Calculate expected values
+        expected_total = initial_total + len(high_confidence_suggestions) + len(low_confidence_suggestions)
+        
+        # Count successful suggestions (confidence > 0.5)
+        high_confidence_count = sum(1 for s in high_confidence_suggestions if s['confidence_score'] > 0.5)
+        expected_successful = initial_successful + high_confidence_count
+        
+        # Verify updated analytics values
+        if not self.verify_analytics_values(updated_analytics, expected_total, expected_successful):
             return False
-            
+        
+        # Verify no mock calculations in updated analytics
+        if not self.verify_no_mock_calculations(updated_analytics, updated_analytics['total_suggestions']):
+            return False
+        
+        print("\n" + "="*50)
+        print("✅ ANALYTICS ENDPOINT TESTS PASSED")
+        print("="*50)
+        
         return True
 
     def print_summary(self):
         """Print test summary"""
         print("\n" + "="*50)
-        print(f"📊 Analytics Endpoint Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
+        print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
         print("="*50)
         
         for i, result in enumerate(self.test_results):
@@ -310,32 +310,13 @@ class AnalyticsEndpointTester:
         print("="*50)
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All analytics tests passed!")
+            print("🎉 All tests passed!")
         else:
             print(f"❌ {self.tests_run - self.tests_passed} tests failed")
 
 def main():
-    print("="*50)
-    print("🧪 RAG Assistant Analytics Endpoint Test")
-    print("="*50)
-    print(f"Backend URL: {BACKEND_URL}")
-    print("="*50)
-    
     tester = AnalyticsEndpointTester()
-    
-    # Test 1: Verify analytics endpoint structure
-    tester.test_analytics_structure()
-    
-    # Test 2: Verify data accuracy for a fresh database
-    tester.test_analytics_data_accuracy()
-    
-    # Test 3: Verify unit conversions (confidence to %, time to seconds)
-    tester.test_analytics_unit_conversion()
-    
-    # Test 4: Verify analytics updates after creating a suggestion
-    tester.test_analytics_after_suggestion()
-    
-    # Print summary
+    tester.run_analytics_tests()
     tester.print_summary()
 
 if __name__ == "__main__":
