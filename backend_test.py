@@ -517,6 +517,9 @@ def main():
     # Test analytics endpoint
     tester.test_get_analytics()
     
+    # Test analytics after creating a suggestion
+    tester.test_analytics_after_suggestion()
+    
     # Test code search
     tester.test_search_code("ansible module")
     
