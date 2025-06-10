@@ -151,3 +151,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Fixed analytics dummy values issue. Frontend was showing hardcoded values (247 suggestions, 87.3% confidence, etc.) instead of calling the backend /api/analytics endpoint. Updated loadAnalytics function to fetch real data from backend and properly map the response. Ready for testing."
+  - agent: "testing"
+    message: "Completed testing of the analytics endpoint. The backend API correctly returns real data from MongoDB instead of dummy values. Created a dedicated test script (analytics_test.py) that verifies all requirements. Tests confirmed that the endpoint returns proper JSON structure with all required fields, avg_confidence is converted to percentage, and avg_processing_time is converted from milliseconds to seconds. For a fresh database, all metrics are 0 as expected. After creating test suggestions, the analytics data updates correctly with real calculated values. All tests passed successfully."
