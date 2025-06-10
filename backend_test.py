@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 class RAGCodeSuggestionAPITester:
-    def __init__(self, base_url="https://860488f2-f040-4baf-a319-6a888ae71c12.preview.emergentagent.com"):
+    def __init__(self, base_url="https://c624a4bd-9719-44d8-8b44-e52e7972801c.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
