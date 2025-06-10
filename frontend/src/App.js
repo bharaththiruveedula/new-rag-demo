@@ -628,9 +628,9 @@ ${lines.map(line => '+' + line).join('\n')}`;
 
   // Configuration Tab - Clean Form Design
   const ConfigurationTab = () => (
-    <div className="space-y-12">
-      <div className="space-y-6">
-        <h1 className="text-4xl font-light text-gray-900 tracking-tight">
+    <div className="content-section">
+      <div className="content-section">
+        <h1 className="text-3xl lg:text-4xl font-light text-gray-900 tracking-tight">
           Configuration
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
@@ -638,13 +638,13 @@ ${lines.map(line => '+' + line).join('\n')}`;
         </p>
       </div>
       
-      <div className="space-y-12">
+      <div className="content-section">
         {/* OLLAMA Configuration */}
-        <div className="bg-white border border-gray-200 p-8 space-y-6">
-          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+        <div className="card card-padding content-section">
+          <h2 className="text-xl lg:text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
             OLLAMA AI
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="responsive-grid-2">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">OLLAMA URL</label>
               <div className="flex space-x-2">
@@ -652,13 +652,13 @@ ${lines.map(line => '+' + line).join('\n')}`;
                   type="text"
                   value={config.ollama_url || ''}
                   onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
-                  className="flex-1 px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                  className="form-input flex-1"
                   placeholder="http://localhost:11434"
                 />
                 <button
                   onClick={() => fetchAvailableModels()}
                   disabled={loadingModels || !config.ollama_url}
-                  className="px-4 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="btn-secondary disabled:opacity-50"
                   title="Refresh available models"
                 >
                   {loadingModels ? '⟳' : '🔄'}
@@ -673,7 +673,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
               <select
                 value={config.ollama_model || ''}
                 onChange={(e) => setConfig({...config, ollama_model: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-select"
                 disabled={loadingModels}
               >
                 <option value="">
@@ -700,18 +700,18 @@ ${lines.map(line => '+' + line).join('\n')}`;
         </div>
 
         {/* GitLab Configuration */}
-        <div className="bg-white border border-gray-200 p-8 space-y-6">
-          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+        <div className="card card-padding content-section">
+          <h2 className="text-xl lg:text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
             GitLab
           </h2>
-          <div className="space-y-6">
+          <div className="content-section">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">GitLab URL</label>
               <input
                 type="text"
                 value={config.gitlab_url || ''}
                 onChange={(e) => setConfig({...config, gitlab_url: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="https://gitlab.example.com"
               />
             </div>
@@ -721,7 +721,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="password"
                 value={config.gitlab_token || ''}
                 onChange={(e) => setConfig({...config, gitlab_token: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
               />
             </div>
@@ -731,7 +731,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="text"
                 value={config.target_repository || ''}
                 onChange={(e) => setConfig({...config, target_repository: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="group/ansible-automation"
               />
             </div>
@@ -739,18 +739,18 @@ ${lines.map(line => '+' + line).join('\n')}`;
         </div>
 
         {/* JIRA Configuration */}
-        <div className="bg-white border border-gray-200 p-8 space-y-6">
-          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+        <div className="card card-padding content-section">
+          <h2 className="text-xl lg:text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
             JIRA
           </h2>
-          <div className="space-y-6">
+          <div className="content-section">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">JIRA URL</label>
               <input
                 type="text"
                 value={config.jira_url || ''}
                 onChange={(e) => setConfig({...config, jira_url: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="https://company.atlassian.net"
               />
             </div>
@@ -760,7 +760,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="text"
                 value={config.jira_username || ''}
                 onChange={(e) => setConfig({...config, jira_username: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="user@example.com"
               />
             </div>
@@ -770,7 +770,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="password"
                 value={config.jira_token || ''}
                 onChange={(e) => setConfig({...config, jira_token: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="API token from JIRA settings"
               />
             </div>
@@ -778,18 +778,18 @@ ${lines.map(line => '+' + line).join('\n')}`;
         </div>
 
         {/* PostgreSQL Configuration */}
-        <div className="bg-white border border-gray-200 p-8 space-y-6">
-          <h2 className="text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
+        <div className="card card-padding content-section">
+          <h2 className="text-xl lg:text-2xl font-light text-gray-900 border-b border-gray-200 pb-4">
             PostgreSQL + pgvector
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="responsive-grid-2">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Host</label>
               <input
                 type="text"
                 value={config.postgres_host || ''}
                 onChange={(e) => setConfig({...config, postgres_host: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="localhost"
               />
             </div>
@@ -799,7 +799,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="number"
                 value={config.postgres_port || ''}
                 onChange={(e) => setConfig({...config, postgres_port: parseInt(e.target.value)})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="5432"
               />
             </div>
@@ -809,7 +809,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="text"
                 value={config.postgres_db || ''}
                 onChange={(e) => setConfig({...config, postgres_db: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="vector_db"
               />
             </div>
@@ -819,7 +819,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="text"
                 value={config.postgres_user || ''}
                 onChange={(e) => setConfig({...config, postgres_user: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="postgres"
               />
             </div>
@@ -829,7 +829,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 type="password"
                 value={config.postgres_password || ''}
                 onChange={(e) => setConfig({...config, postgres_password: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+                className="form-input"
                 placeholder="Enter password"
               />
             </div>
@@ -840,7 +840,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <button
             onClick={() => updateConfiguration(config)}
             disabled={isLoading}
-            className="px-12 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="btn-primary px-12 disabled:opacity-50"
           >
             {isLoading ? 'Saving...' : 'Save Configuration'}
           </button>
