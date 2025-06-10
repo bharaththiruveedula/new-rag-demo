@@ -853,7 +853,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
     <div className="min-h-screen bg-white">
       {/* Clean Header - App Focused */}
       <header className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="responsive-container">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-red-600"></div>
@@ -865,8 +865,8 @@ ${lines.map(line => '+' + line).join('\n')}`;
 
       {/* Main Navigation */}
       <nav className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="flex space-x-12">
+        <div className="responsive-container">
+          <div className="flex space-x-8 lg:space-x-12 overflow-x-auto">
             {[
               { id: 'dashboard', name: 'Dashboard' },
               { id: 'suggestions', name: 'Code Suggestions' },
@@ -876,7 +876,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 font-medium transition-colors border-b-2 ${
+                className={`py-4 font-medium transition-colors border-b-2 whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-red-600 text-red-600'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -890,11 +890,13 @@ ${lines.map(line => '+' + line).join('\n')}`;
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-8 py-12">
-        {activeTab === 'dashboard' && <DashboardTab />}
-        {activeTab === 'suggestions' && <CodeSuggestionsTab />}
-        {activeTab === 'vectorization' && <VectorizationTab />}
-        {activeTab === 'config' && <ConfigurationTab />}
+      <main className="responsive-container py-8 lg:py-12">
+        <div className="content-area">
+          {activeTab === 'dashboard' && <DashboardTab />}
+          {activeTab === 'suggestions' && <CodeSuggestionsTab />}
+          {activeTab === 'vectorization' && <VectorizationTab />}
+          {activeTab === 'config' && <ConfigurationTab />}
+        </div>
       </main>
 
       {/* Clean Footer */}
