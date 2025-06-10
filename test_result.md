@@ -116,6 +116,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend analytics endpoint was already implemented correctly. It calculates real data from MongoDB collections including total_suggestions, avg_confidence, avg_processing_time, successful_merge_requests, usage_by_day, and top_ticket_types. Returns AnalyticsData model with actual database queries."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the analytics endpoint returns real data from MongoDB. Confirmed that avg_confidence is converted to percentage (multiplied by 100) and avg_processing_time is converted from milliseconds to seconds. Created a dedicated test script (analytics_test.py) that verifies all requirements. Tests confirmed that analytics data updates correctly after creating new suggestions."
 
 frontend:
   - task: "Load real analytics data instead of dummy values"
