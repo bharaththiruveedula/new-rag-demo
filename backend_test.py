@@ -224,6 +224,166 @@ class RAGCodeSuggestionAPITester:
             analytics = response.json()
             print(f"Analytics - Total Suggestions: {analytics.get('total_suggestions')} - Avg Confidence: {analytics.get('avg_confidence')}%")
             print(f"Successful MRs: {analytics.get('successful_merge_requests')} - Avg Processing Time: {analytics.get('avg_processing_time')}s")
+            
+            # Verify the JSON structure has all required fields
+            required_fields = [
+                'total_suggestions', 'successful_suggestions', 'avg_confidence', 
+                'avg_processing_time', 'total_merge_requests', 'successful_merge_requests',
+                'usage_by_day', 'top_ticket_types'
+            ]
+            
+            missing_fields = [field for field in required_fields if field not in analytics]
+            if missing_fields:
+                print(f"❌ Missing required fields in analytics response: {missing_fields}")
+                return False
+            else:
+                print("✅ All required fields present in analytics response")
+            
+            # Verify data types are correct
+            if not isinstance(analytics['total_suggestions'], int):
+                print(f"❌ total_suggestions should be an integer, got {type(analytics['total_suggestions'])}")
+                return False
+                
+            if not isinstance(analytics['avg_confidence'], float):
+                print(f"❌ avg_confidence should be a float, got {type(analytics['avg_confidence'])}")
+                return False
+                
+            if not isinstance(analytics['avg_processing_time'], float):
+                print(f"❌ avg_processing_time should be a float, got {type(analytics['avg_processing_time'])}")
+                return False
+                
+            if not isinstance(analytics['usage_by_day'], dict):
+                print(f"❌ usage_by_day should be a dictionary, got {type(analytics['usage_by_day'])}")
+                return False
+                
+            if not isinstance(analytics['top_ticket_types'], list):
+                print(f"❌ top_ticket_types should be a list, got {type(analytics['top_ticket_types'])}")
+                return False
+            
+            print("✅ All data types are correct in analytics response")
+            
+            # For a fresh database, verify all metrics are 0 or empty
+            # Note: This test assumes a fresh database. If data exists, this check might fail.
+            if analytics['total_suggestions'] == 0:
+                print("✅ total_suggestions is 0 as expected for a fresh database")
+                
+                # If no suggestions, these values should also be 0
+                zero_fields = [
+                    'successful_suggestions', 'avg_confidence', 'avg_processing_time',
+                    'total_merge_requests', 'successful_merge_requests'
+                ]
+                
+                all_zeros = all(analytics[field] == 0 for field in zero_fields)
+                if all_zeros:
+                    print("✅ All metrics are 0 as expected for a fresh database")
+                else:
+                    print("❌ Some metrics are not 0 despite total_suggestions being 0:")
+                    for field in zero_fields:
+                        if analytics[field] != 0:
+                            print(f"  - {field}: {analytics[field]}")
+                
+                if not analytics['usage_by_day']:
+                    print("✅ usage_by_day is empty as expected for a fresh database")
+                else:
+                    print(f"❌ usage_by_day is not empty: {analytics['usage_by_day']}")
+            else:
+                print(f"ℹ️ Database is not fresh, contains {analytics['total_suggestions']} suggestions")
+                
+                # Verify that avg_confidence is in percentage (0-100 range)
+                if 0 <= analytics['avg_confidence'] <= 100:
+                    print("✅ avg_confidence is in percentage range (0-100)")
+                else:
+                    print(f"❌ avg_confidence is not in percentage range: {analytics['avg_confidence']}")
+                
+                # Verify that avg_processing_time is in seconds (not milliseconds)
+                # Typical processing times should be under 60 seconds
+                if 0 <= analytics['avg_processing_time'] < 60:
+                    print("✅ avg_processing_time appears to be in seconds")
+                else:
+                    print(f"❌ avg_processing_time may not be in seconds: {analytics['avg_processing_time']}")
+        
+        return success
+        
+    def test_analytics_after_suggestion(self):
+        """Test analytics data after creating a code suggestion"""
+        print("\n🔍 Testing analytics before and after creating a suggestion...")
+        
+        # First, get initial analytics
+        success, initial_response = self.run_test(
+            "Get Initial Analytics",
+            "GET",
+            "analytics",
+            200
+        )
+        
+        if not success:
+            print("❌ Failed to get initial analytics")
+            return False
+            
+        initial_analytics = initial_response.json()
+        initial_count = initial_analytics['total_suggestions']
+        print(f"Initial total_suggestions: {initial_count}")
+        
+        # Create a test suggestion
+        test_ticket_id = f"TEST-{int(time.time())}"  # Use timestamp to ensure unique ticket ID
+        success, suggestion_response = self.run_test(
+            "Create Test Suggestion",
+            "POST",
+            "suggest/code",
+            200,
+            data={"ticket_id": test_ticket_id}
+        )
+        
+        if not success:
+            print("❌ Failed to create test suggestion")
+            return False
+            
+        # Wait a moment for database to update
+        time.sleep(1)
+        
+        # Get updated analytics
+        success, updated_response = self.run_test(
+            "Get Updated Analytics",
+            "GET",
+            "analytics",
+            200
+        )
+        
+        if not success:
+            print("❌ Failed to get updated analytics")
+            return False
+            
+        updated_analytics = updated_response.json()
+        updated_count = updated_analytics['total_suggestions']
+        print(f"Updated total_suggestions: {updated_count}")
+        
+        # Verify that total_suggestions increased by 1
+        if updated_count == initial_count + 1:
+            print("✅ total_suggestions increased by 1 after creating a suggestion")
+        else:
+            print(f"❌ total_suggestions did not increase correctly. Expected {initial_count + 1}, got {updated_count}")
+            
+        # Verify that avg_confidence is calculated and in percentage form
+        if updated_analytics['avg_confidence'] > 0:
+            print(f"✅ avg_confidence is calculated: {updated_analytics['avg_confidence']}%")
+            
+            # Verify it's in percentage form (0-100 range)
+            if 0 <= updated_analytics['avg_confidence'] <= 100:
+                print("✅ avg_confidence is in percentage range (0-100)")
+            else:
+                print(f"❌ avg_confidence is not in percentage range: {updated_analytics['avg_confidence']}")
+        
+        # Verify that avg_processing_time is calculated and in seconds
+        if updated_analytics['avg_processing_time'] > 0:
+            print(f"✅ avg_processing_time is calculated: {updated_analytics['avg_processing_time']}s")
+            
+            # Verify it's in seconds (not milliseconds)
+            # Typical processing times should be under 60 seconds
+            if 0 <= updated_analytics['avg_processing_time'] < 60:
+                print("✅ avg_processing_time appears to be in seconds")
+            else:
+                print(f"❌ avg_processing_time may not be in seconds: {updated_analytics['avg_processing_time']}")
+        
         return success
         
     def test_search_code(self, query):
