@@ -19,6 +19,7 @@ function App() {
   const [codeSuggestion, setCodeSuggestion] = useState(null);
   const [availableModels, setAvailableModels] = useState([]);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('');
 
   // Load configuration and data on component mount
   useEffect(() => {
