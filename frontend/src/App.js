@@ -347,11 +347,6 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 No models found. Check OLLAMA connection or click refresh.
               </p>
             )}
-            {availableModels.length > 0 && (
-              <p className="text-xs text-gray-500">
-                {availableModels.length} model(s) available from OLLAMA
-              </p>
-            )}
           </div>
           
           <div className="pt-4">
