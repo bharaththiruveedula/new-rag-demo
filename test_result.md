@@ -172,6 +172,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Verified that the static model count text ('3 model(s) available from OLLAMA') has been completely removed from the Code Suggestions page. The AI Model dropdown section now only shows the dropdown with model options and the refresh button. When no models are found, an appropriate error message is displayed. The dropdown functionality remains intact."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the Code Suggestions page properly handles the case when OLLAMA is not connected. The AI Model dropdown shows 'No models available (OLLAMA not connected)' as the option text and is correctly disabled. The error message 'No models available. OLLAMA service is not connected.' is displayed below the dropdown. The API response from /api/ollama/models has status: 'error' and models: [] (empty array). The refresh button remains functional and triggers a new API request when clicked. No hardcoded model names were found in the page content."
   - task: "Dashboard Page - Analytics Removed"
     implemented: true
     working: true
