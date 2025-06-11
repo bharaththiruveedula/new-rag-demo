@@ -72,6 +72,32 @@ function App() {
     }
   };
 
+  const fetchOllamaModels = async () => {
+    try {
+      setLoadingModels(true);
+      const response = await fetch(`${API_BASE_URL}/api/ollama/models`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success' && data.models) {
+          setAvailableModels(data.models);
+          // Set the first model as default if none selected
+          if (data.models.length > 0 && !selectedModel) {
+            setSelectedModel(data.models[0]);
+          }
+        } else {
+          // Use fallback models
+          setAvailableModels(data.models || ['codellama', 'deepseek-coder', 'magicoder']);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch OLLAMA models:', error);
+      // Fallback to default models on error
+      setAvailableModels(['codellama', 'deepseek-coder', 'magicoder']);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
   const updateConfiguration = async (updates) => {
     try {
       setIsLoading(true);
