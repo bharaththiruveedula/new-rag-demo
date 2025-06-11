@@ -892,7 +892,10 @@ Generate Ansible-compatible Python or YAML code:
 """
 
         # Generate code with OLLAMA using selected model
-        generated_code = await generate_code_with_ollama(config, rag_prompt)
+        # Create a temporary config with the selected model
+        temp_config = config.copy()
+        temp_config.ollama_model = selected_model
+        generated_code = await generate_code_with_ollama(temp_config, rag_prompt)
         
         # Calculate processing time
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
