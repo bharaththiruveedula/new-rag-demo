@@ -47,30 +47,6 @@ function App() {
     }
   };
 
-  const fetchAvailableModels = async (ollamaUrl = null) => {
-    const url = ollamaUrl || config.ollama_url;
-    if (!url) return;
-
-    try {
-      setLoadingModels(true);
-      const response = await fetch(`${API_BASE_URL}/api/status/ollama`);
-      if (response.ok) {
-        const status = await response.json();
-        if (status.status === 'connected' && status.details && status.details.available_models) {
-          setAvailableModels(status.details.available_models);
-        } else {
-          // Fallback to default models if OLLAMA is not connected
-          setAvailableModels(['codellama', 'codellama:13b', 'codellama:34b', 'deepseek-coder', 'magicoder']);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch available models:', error);
-      // Fallback to default models on error
-      setAvailableModels(['codellama', 'codellama:13b', 'codellama:34b', 'deepseek-coder', 'magicoder']);
-    } finally {
-      setLoadingModels(false);
-    }
-  };
 
   const fetchOllamaModels = async () => {
     try {
