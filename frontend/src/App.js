@@ -9,12 +9,6 @@ function App() {
   const [config, setConfig] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [vectorizationStatus, setVectorizationStatus] = useState(null);
-  const [analytics, setAnalytics] = useState({
-    totalSuggestions: 0,
-    avgConfidence: 0,
-    successfulMRs: 0,
-    processingTime: 0
-  });
   const [jiraTicketId, setJiraTicketId] = useState('');
   const [codeSuggestion, setCodeSuggestion] = useState(null);
   const [availableModels, setAvailableModels] = useState([]);
