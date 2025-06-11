@@ -39,7 +39,7 @@ function App() {
         
         // If OLLAMA URL is configured, fetch available models
         if (configData.ollama_url) {
-          await fetchAvailableModels(configData.ollama_url);
+          await fetchOllamaModels();
         }
       }
     } catch (error) {
