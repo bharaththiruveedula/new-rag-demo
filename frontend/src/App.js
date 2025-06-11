@@ -315,10 +315,12 @@ ${lines.map(line => '+' + line).join('\n')}`;
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="flex-1 px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
-                disabled={loadingModels}
+                disabled={loadingModels || availableModels.length === 0}
               >
                 <option value="">
-                  {loadingModels ? 'Loading models...' : 'Select Model (or use default)'}
+                  {loadingModels ? 'Loading models...' : 
+                   availableModels.length === 0 ? 'No models available (OLLAMA not connected)' : 
+                   'Select Model (or use default)'}
                 </option>
                 {availableModels.map((model) => (
                   <option key={model} value={model}>
