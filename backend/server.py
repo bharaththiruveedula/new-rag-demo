@@ -44,23 +44,23 @@ vectorizer_status = {"status": "not_started", "details": []}
 # Enhanced Configuration Models
 class ServiceConfig(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    ollama_url: str = "http://localhost:11434"
-    ollama_model: str = "codellama"
-    gitlab_url: str = "https://gitlab.example.com"
-    gitlab_token: str = ""
-    jira_url: str = "https://jira.example.com"
-    jira_username: str = ""
-    jira_token: str = ""
-    postgres_host: str = "localhost"
-    postgres_port: int = 5432
-    postgres_db: str = "vector_db"
-    postgres_user: str = "postgres"
-    postgres_password: str = ""
-    target_repository: str = ""
-    default_branch: str = "main"
-    embedding_model: str = "all-MiniLM-L6-v2"
-    chunk_size: int = 512
-    chunk_overlap: int = 50
+    ollama_url: str = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
+    ollama_model: str = os.environ.get('OLLAMA_MODEL', 'codellama')
+    gitlab_url: str = os.environ.get('GITLAB_URL', 'https://gitlab.example.com')
+    gitlab_token: str = os.environ.get('GITLAB_TOKEN', '')
+    jira_url: str = os.environ.get('JIRA_URL', 'https://jira.example.com')
+    jira_username: str = os.environ.get('JIRA_USERNAME', '')
+    jira_token: str = os.environ.get('JIRA_TOKEN', '')
+    postgres_host: str = os.environ.get('POSTGRES_HOST', 'localhost')
+    postgres_port: int = int(os.environ.get('POSTGRES_PORT', '5432'))
+    postgres_db: str = os.environ.get('POSTGRES_DB', 'vector_db')
+    postgres_user: str = os.environ.get('POSTGRES_USER', 'postgres')
+    postgres_password: str = os.environ.get('POSTGRES_PASSWORD', '')
+    target_repository: str = os.environ.get('TARGET_REPOSITORY', '')
+    default_branch: str = os.environ.get('DEFAULT_BRANCH', 'main')
+    embedding_model: str = os.environ.get('EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
+    chunk_size: int = int(os.environ.get('CHUNK_SIZE', '512'))
+    chunk_overlap: int = int(os.environ.get('CHUNK_OVERLAP', '50'))
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class ConfigUpdate(BaseModel):
