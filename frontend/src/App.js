@@ -69,33 +69,7 @@ function App() {
     }
   };
 
-  const updateConfiguration = async (updates) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/config`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      });
-      
-      if (response.ok) {
-        const updatedConfig = await response.json();
-        setConfig(updatedConfig);
-        await checkAllConnections();
-        
-        // If OLLAMA URL was updated, fetch available models
-        if (updates.ollama_url) {
-          await fetchOllamaModels();
-        }
-      }
-    } catch (error) {
-      console.error('Failed to update configuration:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const checkAllConnections = async () => {
     try {
