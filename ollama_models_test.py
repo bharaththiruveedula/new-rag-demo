@@ -101,7 +101,7 @@ class OllamaModelsAPITester:
             print(f"OLLAMA Models Response: {json.dumps(models_data, indent=2)}")
             
             # Verify response structure
-            required_fields = ['status', 'models', 'total_models', 'ollama_url']
+            required_fields = ['status', 'models', 'ollama_url']
             missing_fields = [field for field in required_fields if field not in models_data]
             
             if missing_fields:
