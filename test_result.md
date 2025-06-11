@@ -169,6 +169,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Verified that the AI Model dropdown exists and is populated with models from the backend API. The dropdown shows 3 models (codellama, deepseek-coder, magicoder) fetched from the /api/ollama/models endpoint. The refresh button is present and functional. When generating code, the selected model is included in the request to the backend."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the static model count text ('3 model(s) available from OLLAMA') has been completely removed from the Code Suggestions page. The AI Model dropdown section now only shows the dropdown with model options and the refresh button. When no models are found, an appropriate error message is displayed. The dropdown functionality remains intact."
   - task: "Dashboard Page - Analytics Removed"
     implemented: true
     working: true
@@ -183,6 +186,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Confirmed that the Analytics section has been completely removed from the Dashboard page. The Dashboard now only shows the System Status section with service connection statuses. No references to analytics metrics were found on the page."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the 'Refresh Status' button has been completely removed from the Dashboard page. The System Status section still displays properly with status cards showing connection statuses for different services. The page functions normally without the refresh button."
   - task: "Configuration Page - Real Backend Values"
     implemented: true
     working: true
