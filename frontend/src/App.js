@@ -267,16 +267,6 @@ ${lines.map(line => '+' + line).join('\n')}`;
             </div>
           ))}
         </div>
-
-        <div className="text-center pt-8">
-          <button
-            onClick={checkAllConnections}
-            disabled={isLoading}
-            className="btn-primary disabled:opacity-50"
-          >
-            {isLoading ? 'Checking...' : 'Refresh Status'}
-          </button>
-        </div>
       </div>
     </div>
   );
