@@ -812,7 +812,44 @@ async def get_vectorization_status():
         details=["No vectorization has been performed yet"]
     )
 
-@api_router.post("/suggest/code", response_model=AdvancedCodeSuggestion)
+@api_router.get("/ollama/models")
+async def get_ollama_models():
+    """Get available models from OLLAMA endpoint"""
+    config = await get_config()
+    
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(f"{config.ollama_url}/api/tags")
+            
+            if response.status_code == 200:
+                models_data = response.json()
+                models = models_data.get("models", [])
+                model_names = [model.get("name", "").split(":")[0] for model in models]
+                # Remove duplicates and empty names
+                unique_models = list(set([name for name in model_names if name]))
+                
+                return {
+                    "status": "success",
+                    "models": unique_models,
+                    "total_models": len(unique_models),
+                    "ollama_url": config.ollama_url
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": f"Failed to fetch models from OLLAMA: HTTP {response.status_code}",
+                    "models": ["codellama", "deepseek-coder", "magicoder"],  # Fallback models
+                    "ollama_url": config.ollama_url
+                }
+                
+    except Exception as e:
+        logging.error(f"Failed to fetch OLLAMA models: {str(e)}")
+        return {
+            "status": "error", 
+            "message": f"Connection failed: {str(e)}",
+            "models": ["codellama", "deepseek-coder", "magicoder"],  # Fallback models
+            "ollama_url": config.ollama_url
+        }
 async def suggest_code_advanced(ticket_input: JIRATicketInput):
     """Generate enhanced code suggestions for a JIRA ticket"""
     start_time = datetime.now()
