@@ -208,12 +208,21 @@ function App() {
     
     try {
       setIsLoading(true);
+      const requestData = { 
+        ticket_id: jiraTicketId
+      };
+      
+      // Add selected model if one is chosen
+      if (selectedModel) {
+        requestData.model = selectedModel;
+      }
+      
       const response = await fetch(`${API_BASE_URL}/api/suggest/code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ticket_id: jiraTicketId }),
+        body: JSON.stringify(requestData),
       });
       
       if (response.ok) {
