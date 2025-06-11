@@ -416,22 +416,64 @@ ${lines.map(line => '+' + line).join('\n')}`;
             <label className="block text-sm font-medium text-gray-900">
               JIRA Ticket ID
             </label>
+            <input
+              type="text"
+              value={jiraTicketId}
+              onChange={(e) => setJiraTicketId(e.target.value)}
+              placeholder="e.g., PROJ-123, ANSIBLE-456"
+              className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-900">
+              AI Model
+            </label>
             <div className="flex space-x-4">
-              <input
-                type="text"
-                value={jiraTicketId}
-                onChange={(e) => setJiraTicketId(e.target.value)}
-                placeholder="e.g., PROJ-123, ANSIBLE-456"
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
                 className="flex-1 px-4 py-3 border border-gray-300 focus:border-black focus:outline-none text-gray-900"
-              />
-              <button
-                onClick={generateCodeSuggestion}
-                disabled={isLoading || !jiraTicketId.trim()}
-                className="px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                disabled={loadingModels}
               >
-                {isLoading ? 'Generating...' : 'Generate Code'}
+                <option value="">
+                  {loadingModels ? 'Loading models...' : 'Select Model (or use default)'}
+                </option>
+                {availableModels.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={fetchOllamaModels}
+                disabled={loadingModels}
+                className="px-6 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                title="Refresh available models"
+              >
+                {loadingModels ? '⟳' : '🔄'}
               </button>
             </div>
+            {availableModels.length === 0 && !loadingModels && (
+              <p className="text-xs text-amber-600">
+                No models found. Check OLLAMA connection or click refresh.
+              </p>
+            )}
+            {availableModels.length > 0 && (
+              <p className="text-xs text-gray-500">
+                {availableModels.length} model(s) available from OLLAMA
+              </p>
+            )}
+          </div>
+          
+          <div className="pt-4">
+            <button
+              onClick={generateCodeSuggestion}
+              disabled={isLoading || !jiraTicketId.trim()}
+              className="w-full px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {isLoading ? 'Generating...' : `Generate Code${selectedModel ? ` with ${selectedModel}` : ''}`}
+            </button>
           </div>
         </div>
       </div>
