@@ -648,7 +648,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
     </div>
   );
 
-  // Configuration Tab - Clean Form Design
+  // Configuration Tab - Read-only Display
   const ConfigurationTab = () => (
     <div className="content-section">
       <div className="content-section">
@@ -656,7 +656,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
           Configuration
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
-          Configure your external integrations and AI models
+          Current system configuration (read-only)
         </p>
       </div>
       
@@ -669,54 +669,15 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <div className="responsive-grid-2">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">OLLAMA URL</label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={config.ollama_url || ''}
-                  onChange={(e) => setConfig({...config, ollama_url: e.target.value})}
-                  className="form-input flex-1"
-                  placeholder="http://localhost:11434"
-                />
-                <button
-                  onClick={() => fetchAvailableModels()}
-                  disabled={loadingModels || !config.ollama_url}
-                  className="btn-secondary disabled:opacity-50"
-                  title="Refresh available models"
-                >
-                  {loadingModels ? '⟳' : '🔄'}
-                </button>
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.ollama_url || 'Not configured'}
               </div>
-              <p className="text-xs text-gray-500">
-                Update URL and click refresh to fetch available models
-              </p>
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-900">Model Name</label>
-              <select
-                value={config.ollama_model || ''}
-                onChange={(e) => setConfig({...config, ollama_model: e.target.value})}
-                className="form-select"
-                disabled={loadingModels}
-              >
-                <option value="">
-                  {loadingModels ? 'Loading models...' : 'Select Model'}
-                </option>
-                {availableModels.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
-              {availableModels.length === 0 && !loadingModels && (
-                <p className="text-xs text-amber-600">
-                  No models found. Check OLLAMA connection or click refresh.
-                </p>
-              )}
-              {availableModels.length > 0 && (
-                <p className="text-xs text-gray-500">
-                  {availableModels.length} model(s) available from OLLAMA
-                </p>
-              )}
+              <label className="block text-sm font-medium text-gray-900">Default Model</label>
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.ollama_model || 'Not configured'}
+              </div>
             </div>
           </div>
         </div>
@@ -729,33 +690,21 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <div className="content-section">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">GitLab URL</label>
-              <input
-                type="text"
-                value={config.gitlab_url || ''}
-                onChange={(e) => setConfig({...config, gitlab_url: e.target.value})}
-                className="form-input"
-                placeholder="https://gitlab.example.com"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.gitlab_url || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Access Token</label>
-              <input
-                type="password"
-                value={config.gitlab_token || ''}
-                onChange={(e) => setConfig({...config, gitlab_token: e.target.value})}
-                className="form-input"
-                placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.gitlab_token ? '••••••••••••••••••••' : 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Target Repository</label>
-              <input
-                type="text"
-                value={config.target_repository || ''}
-                onChange={(e) => setConfig({...config, target_repository: e.target.value})}
-                className="form-input"
-                placeholder="group/ansible-automation"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.target_repository || 'Not configured'}
+              </div>
             </div>
           </div>
         </div>
@@ -768,33 +717,21 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <div className="content-section">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">JIRA URL</label>
-              <input
-                type="text"
-                value={config.jira_url || ''}
-                onChange={(e) => setConfig({...config, jira_url: e.target.value})}
-                className="form-input"
-                placeholder="https://company.atlassian.net"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.jira_url || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Username/Email</label>
-              <input
-                type="text"
-                value={config.jira_username || ''}
-                onChange={(e) => setConfig({...config, jira_username: e.target.value})}
-                className="form-input"
-                placeholder="user@example.com"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.jira_username || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">API Token</label>
-              <input
-                type="password"
-                value={config.jira_token || ''}
-                onChange={(e) => setConfig({...config, jira_token: e.target.value})}
-                className="form-input"
-                placeholder="API token from JIRA settings"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.jira_token ? '••••••••••••••••••••' : 'Not configured'}
+              </div>
             </div>
           </div>
         </div>
@@ -807,65 +744,43 @@ ${lines.map(line => '+' + line).join('\n')}`;
           <div className="responsive-grid-2">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Host</label>
-              <input
-                type="text"
-                value={config.postgres_host || ''}
-                onChange={(e) => setConfig({...config, postgres_host: e.target.value})}
-                className="form-input"
-                placeholder="localhost"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.postgres_host || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Port</label>
-              <input
-                type="number"
-                value={config.postgres_port || ''}
-                onChange={(e) => setConfig({...config, postgres_port: parseInt(e.target.value)})}
-                className="form-input"
-                placeholder="5432"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.postgres_port || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Database</label>
-              <input
-                type="text"
-                value={config.postgres_db || ''}
-                onChange={(e) => setConfig({...config, postgres_db: e.target.value})}
-                className="form-input"
-                placeholder="vector_db"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.postgres_db || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Username</label>
-              <input
-                type="text"
-                value={config.postgres_user || ''}
-                onChange={(e) => setConfig({...config, postgres_user: e.target.value})}
-                className="form-input"
-                placeholder="postgres"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.postgres_user || 'Not configured'}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">Password</label>
-              <input
-                type="password"
-                value={config.postgres_password || ''}
-                onChange={(e) => setConfig({...config, postgres_password: e.target.value})}
-                className="form-input"
-                placeholder="Enter password"
-              />
+              <div className="px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded">
+                {config.postgres_password ? '••••••••••••••••••••' : 'Not configured'}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="text-center pt-8">
-          <button
-            onClick={() => updateConfiguration(config)}
-            disabled={isLoading}
-            className="btn-primary px-12 disabled:opacity-50"
-          >
-            {isLoading ? 'Saving...' : 'Save Configuration'}
-          </button>
+        <div className="bg-blue-50 border border-blue-200 p-6 content-section">
+          <h3 className="text-lg font-medium text-blue-900 mb-2">Configuration Management</h3>
+          <p className="text-blue-700 text-sm">
+            Configuration is managed via environment variables in the backend .env file. 
+            Contact your system administrator to update these settings.
+          </p>
         </div>
       </div>
     </div>
