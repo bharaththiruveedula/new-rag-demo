@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Why analytics has dummy values... it should be accurate and no dummy values"
+user_problem_statement: "Test the updated RAG Assistant frontend to verify all the requested changes"
 
 backend:
   - task: "Analytics API endpoint"
@@ -122,6 +122,20 @@ backend:
       - working: true
         agent: "testing"
         comment: "Performed additional verification of the analytics endpoint to ensure all dummy/mock values have been removed. Created two dedicated test scripts (analytics_test.py and analytics_verification.py) that verify the endpoint returns real data. Confirmed that total_suggestions is the actual count from the database (10), successful_suggestions is the real count of suggestions with confidence > 0.5 (10), avg_confidence is the real average (70.0%), avg_processing_time is in seconds (0.538s), total_merge_requests is 0, successful_merge_requests is 0, top_ticket_types contains real data based on ticket summaries, and usage_by_day contains real usage data. No mock calculations were detected - specifically verified that the endpoint is not using 85% success rate, 60% MR creation rate, or 45% successful MR calculations."
+  - task: "OLLAMA Models API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend OLLAMA models endpoint is implemented correctly. It fetches available models from the OLLAMA API and returns them as a list. The endpoint is at /api/ollama/models and returns a JSON response with status, models array, total_models count, and ollama_url."
+      - working: true
+        agent: "testing"
+        comment: "Verified that the /api/ollama/models endpoint correctly fetches models from the OLLAMA API. It returns a JSON response with the models array containing unique model names. If the OLLAMA API is unavailable, it returns fallback models but clearly indicates an error status."
 
 frontend:
   - task: "Load real analytics data instead of dummy values"
@@ -141,6 +155,39 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Verified that the frontend is correctly calling the /api/analytics endpoint and displaying real data from the backend. Confirmed that the displayed values (Total Suggestions: 4, Avg Confidence: 70%, Successful MRs: 1, Processing Time: 0.51287775s) match the API response. No hardcoded dummy values (247, 87.3%, 156, 2.4s) were found."
+  - task: "Code Suggestions Page - AI Model Dropdown"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented AI Model dropdown in Code Suggestions page that fetches models from /api/ollama/models endpoint. Added loading state, refresh button, and proper selection handling."
+  - task: "Dashboard Page - Analytics Removed"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Removed Analytics section from Dashboard page. Now Dashboard only shows System Status section."
+  - task: "Configuration Page - Real Backend Values"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated Configuration page to display real values from /api/config endpoint. All fields are read-only and sensitive values like tokens and passwords are masked."
 
 metadata:
   created_by: "main_agent"
@@ -149,7 +196,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Load real analytics data instead of dummy values"
+    - "Code Suggestions Page - AI Model Dropdown"
+    - "Dashboard Page - Analytics Removed"
+    - "Configuration Page - Real Backend Values"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -161,3 +210,5 @@ agent_communication:
     message: "Completed testing of the analytics endpoint. The backend API correctly returns real data from MongoDB instead of dummy values. Created a dedicated test script (analytics_test.py) that verifies all requirements. Tests confirmed that the endpoint returns proper JSON structure with all required fields, avg_confidence is converted to percentage, and avg_processing_time is converted from milliseconds to seconds. For a fresh database, all metrics are 0 as expected. After creating test suggestions, the analytics data updates correctly with real calculated values. All tests passed successfully."
   - agent: "testing"
     message: "Performed additional verification of the analytics endpoint to ensure all dummy/mock values have been removed. Created two dedicated test scripts (analytics_test.py and analytics_verification.py) that thoroughly test the endpoint. Confirmed that the endpoint returns real data from the database with no mock calculations. Specifically verified that the endpoint is not using 85% success rate, 60% MR creation rate, or 45% successful MR calculations. Current analytics values: total_suggestions=10, successful_suggestions=10, avg_confidence=70.0%, avg_processing_time=0.538s, total_merge_requests=0, successful_merge_requests=0. The analytics endpoint is working correctly with real data."
+  - agent: "main"
+    message: "Implemented the requested changes to the RAG Assistant frontend: 1) Added AI Model dropdown to Code Suggestions page that fetches models from /api/ollama/models endpoint, 2) Removed Analytics section from Dashboard page, 3) Updated Configuration page to display real values from /api/config endpoint with masked sensitive values. Ready for testing."
