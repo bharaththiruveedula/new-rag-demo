@@ -112,38 +112,6 @@ function App() {
     }
   };
 
-  const loadAnalytics = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/analytics`);
-      if (response.ok) {
-        const analyticsData = await response.json();
-        setAnalytics({
-          totalSuggestions: analyticsData.total_suggestions || 0,
-          avgConfidence: analyticsData.avg_confidence || 0,
-          successfulMRs: analyticsData.successful_merge_requests || 0,
-          processingTime: analyticsData.avg_processing_time || 0
-        });
-      } else {
-        // Fallback to zeros if API fails
-        setAnalytics({
-          totalSuggestions: 0,
-          avgConfidence: 0,
-          successfulMRs: 0,
-          processingTime: 0
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load analytics:', error);
-      // Fallback to zeros if API fails
-      setAnalytics({
-        totalSuggestions: 0,
-        avgConfidence: 0,
-        successfulMRs: 0,
-        processingTime: 0
-      });
-    }
-  };
-
   const startVectorization = async () => {
     try {
       setIsLoading(true);
