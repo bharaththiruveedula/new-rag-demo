@@ -94,7 +94,7 @@ function App() {
         
         // If OLLAMA URL was updated, fetch available models
         if (updates.ollama_url) {
-          await fetchAvailableModels(updates.ollama_url);
+          await fetchOllamaModels();
         }
       }
     } catch (error) {
