@@ -285,7 +285,7 @@ index 0000000..${Math.random().toString(36).substr(2, 7)}
 ${lines.map(line => '+' + line).join('\n')}`;
   };
 
-  // Dashboard Tab (combines status and analytics)
+  // Dashboard Tab (combines status only)
   const DashboardTab = () => (
     <div className="content-section">
       {/* Hero Section - Clean and Minimal */}
@@ -341,31 +341,6 @@ ${lines.map(line => '+' + line).join('\n')}`;
           >
             {isLoading ? 'Checking...' : 'Refresh Status'}
           </button>
-        </div>
-      </div>
-
-      {/* Analytics Section */}
-      <div className="content-section">
-        <h2 className="text-2xl lg:text-3xl font-light text-gray-900 border-b border-gray-200 pb-4">
-          Analytics
-        </h2>
-        
-        <div className="responsive-grid-4">
-          {[
-            { title: 'Total Suggestions', value: analytics.totalSuggestions, unit: '' },
-            { title: 'Avg Confidence', value: analytics.avgConfidence, unit: '%' },
-            { title: 'Successful MRs', value: analytics.successfulMRs, unit: '' },
-            { title: 'Processing Time', value: analytics.processingTime, unit: 's' },
-          ].map((metric, index) => (
-            <div key={index} className="card card-padding text-center content-section">
-              <div className="text-3xl lg:text-4xl font-light text-gray-900">
-                {metric.value}{metric.unit}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">
-                {metric.title}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
