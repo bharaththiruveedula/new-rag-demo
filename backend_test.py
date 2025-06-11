@@ -555,6 +555,9 @@ def main():
     print("\n🔍 Testing OLLAMA Model Fetching after URL update...")
     tester.test_check_service_connection("ollama")
     
+    # Test OLLAMA models endpoint with no fallback models
+    tester.test_ollama_models_endpoint_no_fallback()
+    
     # Test OLLAMA fallback behavior with invalid URL
     print("\n🔍 Testing OLLAMA Fallback Behavior...")
     tester.test_ollama_model_fallback()
