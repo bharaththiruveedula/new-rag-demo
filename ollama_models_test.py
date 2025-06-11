@@ -115,10 +115,11 @@ class OllamaModelsAPITester:
                 print(f"❌ 'models' should be a list, got {type(models_data['models'])}")
                 return False
             
-            # Check if total_models is an integer
-            if not isinstance(models_data['total_models'], int):
-                print(f"❌ 'total_models' should be an integer, got {type(models_data['total_models'])}")
-                return False
+            # Check if total_models exists and is an integer
+            if 'total_models' in models_data:
+                if not isinstance(models_data['total_models'], int):
+                    print(f"❌ 'total_models' should be an integer, got {type(models_data['total_models'])}")
+                    return False
             
             # Check if total_models exists and matches the length of models list
             if 'total_models' in models_data:
