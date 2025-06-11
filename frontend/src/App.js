@@ -337,7 +337,7 @@ ${lines.map(line => '+' + line).join('\n')}`;
             </div>
             {availableModels.length === 0 && !loadingModels && (
               <p className="text-xs text-amber-600">
-                No models found. Check OLLAMA connection or click refresh.
+                No models available. OLLAMA service is not connected.
               </p>
             )}
           </div>
