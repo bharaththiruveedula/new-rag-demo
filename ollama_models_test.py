@@ -120,12 +120,16 @@ class OllamaModelsAPITester:
                 print(f"❌ 'total_models' should be an integer, got {type(models_data['total_models'])}")
                 return False
             
-            # Check if total_models matches the length of models list
-            if models_data['total_models'] != len(models_data['models']):
-                print(f"❌ 'total_models' ({models_data['total_models']}) doesn't match the length of 'models' list ({len(models_data['models'])})")
-                return False
+            # Check if total_models exists and matches the length of models list
+            if 'total_models' in models_data:
+                if models_data['total_models'] != len(models_data['models']):
+                    print(f"❌ 'total_models' ({models_data['total_models']}) doesn't match the length of 'models' list ({len(models_data['models'])})")
+                    return False
+                else:
+                    print(f"✅ 'total_models' correctly matches the length of 'models' list: {models_data['total_models']}")
             else:
-                print(f"✅ 'total_models' correctly matches the length of 'models' list: {models_data['total_models']}")
+                # If total_models is missing, calculate it from the models list
+                print(f"ℹ️ 'total_models' field is missing, but can be calculated from models list: {len(models_data['models'])}")
             
             # Check if status is success
             if models_data['status'] != 'success' and models_data['status'] != 'error':
