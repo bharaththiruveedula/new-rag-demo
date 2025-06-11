@@ -458,6 +458,69 @@ class RAGCodeSuggestionAPITester:
                 print("❌ API response structure is invalid")
                 
         return success
+        
+    def test_ollama_models_endpoint_no_fallback(self):
+        """Test that /api/ollama/models endpoint doesn't return fallback models when OLLAMA is not connected"""
+        print("\n🔍 Testing OLLAMA Models Endpoint with No Fallback Models...")
+        
+        # First update config with invalid OLLAMA URL to simulate disconnected service
+        invalid_config = {
+            "ollama_url": "http://invalid-ollama-url:11434"
+        }
+        self.run_test(
+            "Update Config with Invalid OLLAMA URL",
+            "POST",
+            "config",
+            200,
+            data=invalid_config
+        )
+        
+        # Then call the /api/ollama/models endpoint
+        success, response = self.run_test(
+            "Get OLLAMA Models with Disconnected Service",
+            "GET",
+            "ollama/models",
+            200
+        )
+        
+        if success:
+            result = response.json()
+            print(f"OLLAMA Models Response: {json.dumps(result, indent=2)}")
+            
+            # Check if status is "error"
+            if result.get('status') == 'error':
+                print("✅ Response correctly has status: 'error'")
+            else:
+                print(f"❌ Response has incorrect status: '{result.get('status')}', expected: 'error'")
+                success = False
+            
+            # Check if models array is empty
+            if isinstance(result.get('models'), list) and len(result.get('models')) == 0:
+                print("✅ Models array is empty as expected")
+            else:
+                print(f"❌ Models array is not empty: {result.get('models')}")
+                success = False
+            
+            # Check if message indicates connection failure
+            if 'message' in result and ('failed' in result['message'].lower() or 'error' in result['message'].lower() or 'connection' in result['message'].lower()):
+                print(f"✅ Message indicates connection failure: '{result['message']}'")
+            else:
+                print(f"❌ Message does not indicate connection failure: '{result.get('message', 'No message')}'")
+                success = False
+            
+            # Confirm no fallback models
+            fallback_models = ["codellama", "deepseek-coder", "magicoder"]
+            models = result.get('models', [])
+            
+            for model in fallback_models:
+                if model in models:
+                    print(f"❌ Fallback model '{model}' was incorrectly returned")
+                    success = False
+            
+            if not any(model in models for model in fallback_models):
+                print("✅ No fallback models were returned")
+            
+        return success
 
 def main():
     tester = RAGCodeSuggestionAPITester()
