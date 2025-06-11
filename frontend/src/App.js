@@ -19,7 +19,6 @@ function App() {
   useEffect(() => {
     loadConfiguration();
     checkAllConnections();
-    loadAnalytics();
     getVectorizationStatus();
     fetchOllamaModels();
   }, []);
