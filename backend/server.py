@@ -850,10 +850,14 @@ async def get_ollama_models():
             "models": ["codellama", "deepseek-coder", "magicoder"],  # Fallback models
             "ollama_url": config.ollama_url
         }
+@api_router.post("/suggest/code", response_model=AdvancedCodeSuggestion)
 async def suggest_code_advanced(ticket_input: JIRATicketInput):
     """Generate enhanced code suggestions for a JIRA ticket"""
     start_time = datetime.now()
     config = await get_config()
+    
+    # Use provided model or fall back to config default
+    selected_model = ticket_input.model or config.ollama_model
     
     try:
         # Fetch JIRA ticket details
@@ -887,7 +891,7 @@ Please provide:
 Generate Ansible-compatible Python or YAML code:
 """
 
-        # Generate code with OLLAMA
+        # Generate code with OLLAMA using selected model
         generated_code = await generate_code_with_ollama(config, rag_prompt)
         
         # Calculate processing time
@@ -902,17 +906,17 @@ Generate Ansible-compatible Python or YAML code:
                 "file_path": f"modules/{ticket_input.ticket_id.lower().replace('-', '_')}.py",
                 "change_type": "create",
                 "content": generated_code,
-                "explanation": "Generated based on ticket requirements and similar code patterns"
+                "explanation": f"Generated using {selected_model} based on ticket requirements and similar code patterns"
             }],
             similar_code_snippets=[{
                 "file_path": chunk['chunk']['file_path'],
                 "content": chunk['chunk']['chunk_content'][:200] + "...",
                 "similarity_score": chunk['similarity']
             } for chunk in similar_chunks],
-            explanation=f"Code suggestion generated for {ticket_input.ticket_id} based on semantic analysis of existing codebase and ticket requirements.",
+            explanation=f"Code suggestion generated for {ticket_input.ticket_id} using {selected_model} based on semantic analysis of existing codebase and ticket requirements.",
             confidence_score=min(0.9, sum(chunk['similarity'] for chunk in similar_chunks[:3]) / 3) if similar_chunks else 0.7,
             processing_time_ms=processing_time,
-            model_used=config.ollama_model
+            model_used=selected_model
         )
         
         # Store suggestion
@@ -950,12 +954,12 @@ def main():
 if __name__ == '__main__':
     main()
 """,
-                "explanation": "Fallback implementation - please configure services for enhanced suggestions"
+                "explanation": f"Fallback implementation using {selected_model} - please configure services for enhanced suggestions"
             }],
-            explanation=f"Fallback code suggestion for {ticket_input.ticket_id}. Configure OLLAMA and vectorize repository for enhanced suggestions.",
+            explanation=f"Fallback code suggestion for {ticket_input.ticket_id} using {selected_model}. Configure OLLAMA and vectorize repository for enhanced suggestions.",
             confidence_score=0.5,
             processing_time_ms=processing_time,
-            model_used="fallback"
+            model_used=selected_model or "fallback"
         )
 
 @api_router.post("/gitlab/merge-request")
