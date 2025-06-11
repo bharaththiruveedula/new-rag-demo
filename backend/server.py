@@ -92,6 +92,7 @@ class ConnectionStatus(BaseModel):
 
 class JIRATicketInput(BaseModel):
     ticket_id: str
+    model: Optional[str] = None  # Allow model selection for code suggestions
     
 class AdvancedCodeSuggestion(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
