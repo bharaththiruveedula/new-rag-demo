@@ -838,7 +838,7 @@ async def get_ollama_models():
                 return {
                     "status": "error",
                     "message": f"Failed to fetch models from OLLAMA: HTTP {response.status_code}",
-                    "models": ["codellama", "deepseek-coder", "magicoder"],  # Fallback models
+                    "models": [],  # No fallback models - only show what's actually available
                     "ollama_url": config.ollama_url
                 }
                 
@@ -847,7 +847,7 @@ async def get_ollama_models():
         return {
             "status": "error", 
             "message": f"Connection failed: {str(e)}",
-            "models": ["codellama", "deepseek-coder", "magicoder"],  # Fallback models
+            "models": [],  # No fallback models - only show what's actually available
             "ollama_url": config.ollama_url
         }
 @api_router.post("/suggest/code", response_model=AdvancedCodeSuggestion)
