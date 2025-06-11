@@ -27,6 +27,7 @@ function App() {
     checkAllConnections();
     loadAnalytics();
     getVectorizationStatus();
+    fetchOllamaModels();
   }, []);
 
   const loadConfiguration = async () => {
