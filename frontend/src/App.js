@@ -47,23 +47,26 @@ function App() {
       const response = await fetch(`${API_BASE_URL}/api/ollama/models`);
       if (response.ok) {
         const data = await response.json();
-        if (data.status === 'success' && data.models) {
+        if (data.status === 'success' && data.models && data.models.length > 0) {
           setAvailableModels(data.models);
           // Set the first model as default if none selected
           if (data.models.length > 0 && !selectedModel) {
             setSelectedModel(data.models[0]);
           }
         } else {
-          // Use fallback models only if backend returns them
-          setAvailableModels(data.models || []);
+          // No models available from OLLAMA
+          setAvailableModels([]);
+          setSelectedModel('');
         }
       } else {
         console.error('Failed to fetch OLLAMA models');
         setAvailableModels([]);
+        setSelectedModel('');
       }
     } catch (error) {
       console.error('Failed to fetch OLLAMA models:', error);
       setAvailableModels([]);
+      setSelectedModel('');
     } finally {
       setLoadingModels(false);
     }
