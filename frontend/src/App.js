@@ -85,14 +85,16 @@ function App() {
             setSelectedModel(data.models[0]);
           }
         } else {
-          // Use fallback models
-          setAvailableModels(data.models || ['codellama', 'deepseek-coder', 'magicoder']);
+          // Use fallback models only if backend returns them
+          setAvailableModels(data.models || []);
         }
+      } else {
+        console.error('Failed to fetch OLLAMA models');
+        setAvailableModels([]);
       }
     } catch (error) {
       console.error('Failed to fetch OLLAMA models:', error);
-      // Fallback to default models on error
-      setAvailableModels(['codellama', 'deepseek-coder', 'magicoder']);
+      setAvailableModels([]);
     } finally {
       setLoadingModels(false);
     }
